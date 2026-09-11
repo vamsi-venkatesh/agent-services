@@ -1,0 +1,48 @@
+service: n8n-automation-rescue
+agent: specialist-n8n-automation-rescue
+selection_policy:
+  customer_system_first: true
+  typed_connector_before_browser: true
+  least_privilege_credentials: true
+  verify_external_writes: true
+tools:
+  - id: existing-n8n
+    name: "Existing n8n"
+    category: automation
+    permission: read-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "The client's own instance is where the workflow runs and the only place a repaired version is ever imported — the export we work from comes out of it and the fix goes back into it"
+    alternatives:
+      - "Make"
+      - "Zapier"
+      - "Activepieces"
+  - id: client-supplied-workflow-export
+    name: "Client-supplied workflow export"
+    category: automation
+    permission: read-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "The failing workflow as JSON together with the failing execution ids: the whole rescue is reproduced from those two artifacts and nothing else"
+    alternatives:
+      - "Instance API export"
+      - "manual JSON export"
+  - id: client-tracing
+    name: "Client tracing"
+    category: assurance
+    permission: read
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "The client's own tracing, bound with the client's own credential, so the failing and the patched replays are read side by side from the traces rather than asserted"
+    alternatives:
+      - "n8n execution log"
+      - "client trace store"
+  - id: vvdex-workflow-diagnosis
+    name: "VVDex Workflow Diagnosis"
+    category: automation
+    permission: read-write
+    status: ready
+    connection: internal
+    purpose: "The exported workflow is diffed node by node, the failure family is classified from the recorded executions, and the reproduction case is frozen as a test, so the fix is proven against the failure that started the engagement"
+    alternatives:
+      - "Custom fixtures"

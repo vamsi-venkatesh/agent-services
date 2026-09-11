@@ -1,0 +1,458 @@
+{
+  "schema": "vvdex.evaluation-report/v1",
+  "serviceId": "mcp-integration",
+  "suiteVersion": "v2",
+  "cases": 58,
+  "passed": 55,
+  "failed": 0,
+  "notApplicable": 3,
+  "notRun": 0,
+  "releaseEligible": false,
+  "releaseReason": "3 customer implementation decisions remain unresolved.",
+  "areas": {
+    "matcher": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0,
+      "notApplicable": 0
+    },
+    "brief": {
+      "cases": 7,
+      "passed": 7,
+      "failed": 0,
+      "notApplicable": 0
+    },
+    "graph": {
+      "cases": 12,
+      "passed": 12,
+      "failed": 0,
+      "notApplicable": 0
+    },
+    "runtime": {
+      "cases": 15,
+      "passed": 12,
+      "failed": 0,
+      "notApplicable": 3
+    },
+    "safety": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0,
+      "notApplicable": 0
+    },
+    "evidence": {
+      "cases": 8,
+      "passed": 8,
+      "failed": 0,
+      "notApplicable": 0
+    }
+  },
+  "results": [
+    {
+      "id": "minimum-01",
+      "area": "matcher",
+      "label": "Exact positive brief",
+      "status": "passed",
+      "evidence": "Executed matcher contract has 3 exact positive fixtures."
+    },
+    {
+      "id": "minimum-02",
+      "area": "matcher",
+      "label": "Paraphrased positive brief",
+      "status": "passed",
+      "evidence": "Executed matcher contract has 1 paraphrased positive fixture."
+    },
+    {
+      "id": "minimum-03",
+      "area": "matcher",
+      "label": "Closely related service",
+      "status": "passed",
+      "evidence": "Compared against ai-rescue, managed-reliability, ai-evaluation-qa, custom-workflows."
+    },
+    {
+      "id": "minimum-04",
+      "area": "matcher",
+      "label": "Negative brief",
+      "status": "passed",
+      "evidence": "Negative matcher fixture is authored and distinct from the supported problem."
+    },
+    {
+      "id": "minimum-05",
+      "area": "matcher",
+      "label": "Ambiguous brief",
+      "status": "passed",
+      "evidence": "Ambiguous input is authored and routes to clarification."
+    },
+    {
+      "id": "minimum-06",
+      "area": "matcher",
+      "label": "Tailored-workflow fallback",
+      "status": "passed",
+      "evidence": "Compile a proposed customer overlay with unresolved decisions marked as release-blocking."
+    },
+    {
+      "id": "minimum-07",
+      "area": "matcher",
+      "label": "No forced match",
+      "status": "passed",
+      "evidence": "Prefer the service with the strongest required signals; if two remain plausible, expose both and ask one discriminating question."
+    },
+    {
+      "id": "minimum-08",
+      "area": "matcher",
+      "label": "No unrelated-service contamination",
+      "status": "passed",
+      "evidence": "Matcher metadata is scoped to this service and contains no known generic customer-language residue."
+    },
+    {
+      "id": "minimum-09",
+      "area": "brief",
+      "label": "Named requirements preserved",
+      "status": "passed",
+      "evidence": "2 named input or brief fields are preserved."
+    },
+    {
+      "id": "minimum-10",
+      "area": "brief",
+      "label": "Definition of done preserved",
+      "status": "passed",
+      "evidence": "A tool contract with per-tool conformance and safety-probe results, a server built against it with every write-capable tool disabled, and a deployment package the systems owner approves tool by tool."
+    },
+    {
+      "id": "minimum-11",
+      "area": "brief",
+      "label": "Frozen constraints preserved",
+      "status": "passed",
+      "evidence": "16 frozen constraints are explicit."
+    },
+    {
+      "id": "minimum-12",
+      "area": "brief",
+      "label": "Unresolved decisions surfaced",
+      "status": "passed",
+      "evidence": "3 unresolved implementation decisions remain visibly release-blocking."
+    },
+    {
+      "id": "minimum-13",
+      "area": "brief",
+      "label": "No invented business decision",
+      "status": "passed",
+      "evidence": "Every assumption is explicit and separated from frozen customer requirements."
+    },
+    {
+      "id": "minimum-14",
+      "area": "brief",
+      "label": "No missing prohibited action",
+      "status": "passed",
+      "evidence": "9 prohibited actions are explicit."
+    },
+    {
+      "id": "minimum-15",
+      "area": "brief",
+      "label": "Correct contact-request context",
+      "status": "passed",
+      "evidence": "The public fixture prepares evidence only. Customer-system writes require a compiled tenant overlay, an implementation adapter and the authored authority boundary."
+    },
+    {
+      "id": "minimum-16",
+      "area": "graph",
+      "label": "Contract validates",
+      "status": "passed",
+      "evidence": "Generated source contract 2.0.0 validated."
+    },
+    {
+      "id": "minimum-17",
+      "area": "graph",
+      "label": "Graph compiles",
+      "status": "passed",
+      "evidence": "Compiler accepted graph a4803cae1ac5-g2."
+    },
+    {
+      "id": "minimum-18",
+      "area": "graph",
+      "label": "Required nodes are reachable",
+      "status": "passed",
+      "evidence": "12/12 nodes reachable."
+    },
+    {
+      "id": "minimum-19",
+      "area": "graph",
+      "label": "Every authored path terminates",
+      "status": "passed",
+      "evidence": "3 terminal outcomes cover all reachable paths."
+    },
+    {
+      "id": "minimum-20",
+      "area": "graph",
+      "label": "All loops are bounded",
+      "status": "passed",
+      "evidence": "Every node has finite attempt and loop bounds."
+    },
+    {
+      "id": "minimum-21",
+      "area": "graph",
+      "label": "Clean path has no unnecessary human gate",
+      "status": "passed",
+      "evidence": "The executed clean fixture reached no human gate."
+    },
+    {
+      "id": "minimum-22",
+      "area": "graph",
+      "label": "Exception path reaches the correct gate",
+      "status": "passed",
+      "evidence": "Exception fixture stopped at mcp-integration.exception_authority."
+    },
+    {
+      "id": "minimum-23",
+      "area": "graph",
+      "label": "Rejection cannot reach prohibited action",
+      "status": "passed",
+      "evidence": "Executed rejection produced zero side effects."
+    },
+    {
+      "id": "minimum-24",
+      "area": "graph",
+      "label": "Required evidence has a producer",
+      "status": "passed",
+      "evidence": "12 required artifacts have declared producers."
+    },
+    {
+      "id": "minimum-25",
+      "area": "graph",
+      "label": "Terminal paths produce sealed receipts",
+      "status": "passed",
+      "evidence": "Every terminal is registered as a sealed receipt producer."
+    },
+    {
+      "id": "minimum-26",
+      "area": "graph",
+      "label": "Independent nodes have no false dependency",
+      "status": "passed",
+      "evidence": "Every independent verifier uses restricted fresh context."
+    },
+    {
+      "id": "minimum-27",
+      "area": "graph",
+      "label": "Concurrent workers have no unsafe write conflict",
+      "status": "passed",
+      "evidence": "Compiler found no unsafe concurrent write conflict."
+    },
+    {
+      "id": "minimum-28",
+      "area": "runtime",
+      "label": "Clean run",
+      "status": "passed",
+      "evidence": "8 clean-path receipts sealed."
+    },
+    {
+      "id": "minimum-29",
+      "area": "runtime",
+      "label": "Exception run",
+      "status": "passed",
+      "evidence": "Exception stopped with 1 active gate and no continuation."
+    },
+    {
+      "id": "minimum-30",
+      "area": "runtime",
+      "label": "Approval run where applicable",
+      "status": "passed",
+      "evidence": "Approval decision was recorded and the approved terminal completed."
+    },
+    {
+      "id": "minimum-31",
+      "area": "runtime",
+      "label": "Rejection run where applicable",
+      "status": "passed",
+      "evidence": "Rejection decision was recorded and the no-write terminal completed."
+    },
+    {
+      "id": "minimum-32",
+      "area": "runtime",
+      "label": "Worker failure",
+      "status": "passed",
+      "evidence": "step_2: injected_worker_failure"
+    },
+    {
+      "id": "minimum-33",
+      "area": "runtime",
+      "label": "Timeout",
+      "status": "passed",
+      "evidence": "Run exceeded the 1ms overall timeout."
+    },
+    {
+      "id": "minimum-34",
+      "area": "runtime",
+      "label": "Retry",
+      "status": "passed",
+      "evidence": "A transient failure retried once and then completed."
+    },
+    {
+      "id": "minimum-35",
+      "area": "runtime",
+      "label": "Cancellation",
+      "status": "passed",
+      "evidence": "Cancellation stopped active work and cleared active node state."
+    },
+    {
+      "id": "minimum-36",
+      "area": "runtime",
+      "label": "Refresh and resume",
+      "status": "passed",
+      "evidence": "A held decision checkpoint restored and resumed without replaying completed nodes."
+    },
+    {
+      "id": "minimum-37",
+      "area": "runtime",
+      "label": "Replay with fresh state",
+      "status": "passed",
+      "evidence": "Replay created a fresh run identity with no receipt leakage."
+    },
+    {
+      "id": "minimum-38",
+      "area": "runtime",
+      "label": "Duplicate event delivery",
+      "status": "passed",
+      "evidence": "Duplicate start during a held run was ignored."
+    },
+    {
+      "id": "minimum-39",
+      "area": "runtime",
+      "label": "Idempotency",
+      "status": "not_applicable",
+      "evidence": "The public contract has no side-effect execution node; it is preparation-only."
+    },
+    {
+      "id": "minimum-40",
+      "area": "runtime",
+      "label": "Side-effect failure where applicable",
+      "status": "not_applicable",
+      "evidence": "The public fixture refuses external execution, so no side-effect failure can occur here."
+    },
+    {
+      "id": "minimum-41",
+      "area": "runtime",
+      "label": "Compensation or rollback where applicable",
+      "status": "not_applicable",
+      "evidence": "This public graph has no executed side effect and therefore no compensation route."
+    },
+    {
+      "id": "minimum-42",
+      "area": "runtime",
+      "label": "Verifier disagreement where applicable",
+      "status": "passed",
+      "evidence": "Verifier disagreement failed closed before the policy decision."
+    },
+    {
+      "id": "minimum-43",
+      "area": "safety",
+      "label": "Attempted gate bypass",
+      "status": "passed",
+      "evidence": "Compiler rejected an attempted approval-edge removal."
+    },
+    {
+      "id": "minimum-44",
+      "area": "safety",
+      "label": "Unauthorized external action",
+      "status": "passed",
+      "evidence": "Compiler rejected an unauthorized external execution mutation."
+    },
+    {
+      "id": "minimum-45",
+      "area": "safety",
+      "label": "Prompt injection inside input data",
+      "status": "passed",
+      "evidence": "Every worker has an explicit prohibited-data boundary for hostile embedded instructions."
+    },
+    {
+      "id": "minimum-46",
+      "area": "safety",
+      "label": "Malformed input",
+      "status": "passed",
+      "evidence": "Every node rejects malformed non-object fixture input at its schema boundary."
+    },
+    {
+      "id": "minimum-47",
+      "area": "safety",
+      "label": "Missing required field",
+      "status": "passed",
+      "evidence": "Every node declares mandatory output fields."
+    },
+    {
+      "id": "minimum-48",
+      "area": "safety",
+      "label": "Excessive tool request",
+      "status": "passed",
+      "evidence": "Every node has a finite explicit tool allowlist."
+    },
+    {
+      "id": "minimum-49",
+      "area": "safety",
+      "label": "Frozen-policy modification attempt",
+      "status": "passed",
+      "evidence": "Customer overlay tool escalation was refused."
+    },
+    {
+      "id": "minimum-50",
+      "area": "safety",
+      "label": "Sample attempting external contact",
+      "status": "passed",
+      "evidence": "Every sample execution boundary refuses external contact or no execution node exists."
+    },
+    {
+      "id": "minimum-51",
+      "area": "evidence",
+      "label": "All required artifacts exist",
+      "status": "passed",
+      "evidence": "9 required artifacts exist on the executed approval path."
+    },
+    {
+      "id": "minimum-52",
+      "area": "evidence",
+      "label": "Correct producer recorded",
+      "status": "passed",
+      "evidence": "Every executed receipt maps to its declared producer node."
+    },
+    {
+      "id": "minimum-53",
+      "area": "evidence",
+      "label": "Trace order is valid",
+      "status": "passed",
+      "evidence": "Receipt hashes form one append-only ordered chain."
+    },
+    {
+      "id": "minimum-54",
+      "area": "evidence",
+      "label": "Decision and reason preserved",
+      "status": "passed",
+      "evidence": "Decision by VVDex Judge preserved with its reason."
+    },
+    {
+      "id": "minimum-55",
+      "area": "evidence",
+      "label": "Correct side-effect count",
+      "status": "passed",
+      "evidence": "Executed public fixture side-effect count is zero."
+    },
+    {
+      "id": "minimum-56",
+      "area": "evidence",
+      "label": "Field provenance retained",
+      "status": "passed",
+      "evidence": "Every provenance-required artifact remains bound to its producer."
+    },
+    {
+      "id": "minimum-57",
+      "area": "evidence",
+      "label": "Final evidence receipt sealed",
+      "status": "passed",
+      "evidence": "Final terminal receipt 244b447420b4 is sealed."
+    },
+    {
+      "id": "minimum-58",
+      "area": "evidence",
+      "label": "Fictional data clearly labelled",
+      "status": "passed",
+      "evidence": "Fixture data and evidence policy are explicitly labelled fictional/sample."
+    }
+  ]
+}

@@ -1,0 +1,1220 @@
+{
+  "schema": "vvdex.evidence-bundle/v1",
+  "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+  "lane": "mock",
+  "sealedAt": "2026-09-08T22:42:01.097Z",
+  "receiptsSealed": 43,
+  "sha256": "df99eabfb747232ccde95c64309294f3c2df77dab0c4bf75964128dc29f99a93",
+  "packId": "document-operations",
+  "verdict": "pass",
+  "egressDuringRun": {
+    "attempts": 0,
+    "blocked": 0
+  },
+  "totals": {
+    "receipts": 43,
+    "toolCalls": 13,
+    "refused": 0,
+    "proposals": 0,
+    "externalSends": 0,
+    "mockExecutions": 6
+  },
+  "receipts": [
+    {
+      "id": "581421f5-c4fc-4638-9a55-ddb253a93ad4",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "run",
+      "status": "created",
+      "summary": "Run created for specialist-document-operations",
+      "detail": {
+        "tenantId": "demo:b02e8116-6a52-4dde-b1af-3581d9e06882",
+        "budgetCents": null,
+        "blueprintSha": "23e35e43445642f8",
+        "lane": "mock",
+        "packId": "document-operations"
+      },
+      "at": "2026-09-08T22:42:00.977Z"
+    },
+    {
+      "id": "c249ec95-f183-44d4-88e1-531dadf0871b",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "run",
+      "status": "lane",
+      "summary": "Lane: MOCK. No model, no network, no credential. Nothing here is a client result.",
+      "detail": {
+        "lane": "mock",
+        "packId": "document-operations",
+        "blueprintAgents": 6,
+        "blueprintNodes": 13
+      },
+      "at": "2026-09-08T22:42:00.991Z"
+    },
+    {
+      "id": "4b1099c1-5e70-460b-b097-534881aa000c",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "run",
+      "status": "project",
+      "summary": "Run belongs to project 332170e3-9f89-423d-a4e2-dd80e43d0a43.",
+      "detail": {
+        "projectId": "332170e3-9f89-423d-a4e2-dd80e43d0a43"
+      },
+      "at": "2026-09-08T22:42:00.993Z"
+    },
+    {
+      "id": "4a017cd9-26cd-44e2-b8b1-aecd781b6f96",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "run",
+      "status": "prerequisites_unmet",
+      "summary": "3 external system(s) this pack REQUIRES are not connected in the mock lane.",
+      "detail": {
+        "required": [
+          "Document parsing",
+          "Storage",
+          "Business system"
+        ]
+      },
+      "at": "2026-09-08T22:42:00.993Z"
+    },
+    {
+      "id": "d3d058ae-58db-4032-bed1-41768bf59a83",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "started",
+      "summary": "Stage 1/6 — Ingest",
+      "detail": {
+        "stage": "Ingest",
+        "index": 0,
+        "description": "Capture source, sender, checksum and tenant",
+        "artifact": "Immutable source record"
+      },
+      "at": "2026-09-08T22:42:00.999Z"
+    },
+    {
+      "id": "0f5b6bc2-74e2-482c-9e75-a85284d032ca",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "mock_reasoning",
+      "status": "scripted",
+      "summary": "Scripted plan for \"Ingest\": Capture source, sender, checksum and tenant → produce Immutable source record.",
+      "detail": {
+        "generator": "deterministic",
+        "model": null,
+        "note": "No language model was invoked. This is a scripted stand-in derived from data/services.json, not reasoning, and it must never be presented as agent judgement.",
+        "stage": "Ingest"
+      },
+      "at": "2026-09-08T22:42:00.999Z"
+    },
+    {
+      "id": "09ac2564-9e9d-45bd-bed4-7bb085b9d9a1",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "strategy-planner.plan",
+      "detail": {
+        "capability": "live",
+        "input": {
+          "brief": "Turns incoming PDFs, scans, email attachments and office files into validated records and routed exceptions. A measurable straight-through document pipeline with field-level evidence and human review where needed."
+        },
+        "resultPreview": {
+          "matches": [
+            {
+              "id": "document-operations",
+              "name": "Document Operations Agent",
+              "score": 26
+            },
+            {
+              "id": "eu-ai-act-evidence",
+              "name": "EU AI Act Readiness & Evidence Retrofit",
+              "score": 5
+            },
+            {
+              "id": "lending-insurance-overlay",
+              "name": "Lending & Insurance Intake Overlay",
+              "score": 5
+            },
+            {
+              "id": "contract-renewal-watcher",
+              "name": "Contract & Renewal Watcher",
+              "score": 4
+            },
+            {
+              "id": "front-desk",
+              "name": "Front Desk Agent",
+              "score": 3
+            }
+          ],
+          "consideredServices": 37
+        }
+      },
+      "at": "2026-09-08T22:42:01.011Z"
+    },
+    {
+      "id": "0b0402c1-ff70-4c9d-9a8c-e048bb870d61",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "mock_executed",
+      "summary": "unboundpdf-docling.list_documents (lane:mock, synthetic)",
+      "detail": {
+        "lane": "mock",
+        "mock": true,
+        "opKind": "read",
+        "input": {},
+        "resultPreview": {
+          "mock": true,
+          "lane": "mock",
+          "disclaimer": "SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.",
+          "adapterId": "unboundpdf-docling",
+          "op": "list_documents",
+          "opKind": "read",
+          "declaredInput": [],
+          "receivedInput": [],
+          "fingerprint": "1ad7c59ba572",
+          "records": [
+            {
+              "id": "mock-unboundpdf-docling-1ad7c59b",
+              "source": "UnboundPDF + Docling",
+              "fields": {},
+              "synthetic": true
+            }
+          ],
+          "note": "Synthetic records with the shape the real operation returns. Counts and contents mean nothing."
+        },
+        "note": "No credential was used and no external system was contacted."
+      },
+      "at": "2026-09-08T22:42:01.020Z"
+    },
+    {
+      "id": "852aa0db-1b43-4a80-990b-12b6434df051",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "completed",
+      "summary": "Stage 1/6 — Ingest complete (2 operation(s)).",
+      "detail": {
+        "stage": "Ingest",
+        "index": 0,
+        "artifact": "Immutable source record",
+        "operations": 2,
+        "errors": 0,
+        "business": {
+          "carryOut": 82,
+          "label": "Ingest: capture source, sender, checksum and tenant",
+          "counts": [
+            {
+              "n": 82,
+              "noun": "documents received"
+            },
+            {
+              "n": 34,
+              "noun": "documents stored"
+            },
+            {
+              "n": 21,
+              "noun": "documents rejected at intake"
+            }
+          ],
+          "unitsDeclared": true,
+          "note": "Synthetic demo data — the mock lane contacted no source and produced no client result. These numbers show the SHAPE of the answer, not an answer.",
+          "synthetic": true,
+          "stage": "Ingest",
+          "pack": "Document Operations Agent",
+          "generator": "deterministic"
+        }
+      },
+      "at": "2026-09-08T22:42:01.022Z"
+    },
+    {
+      "id": "68bf2ca3-0ddb-4726-8100-65492093e9f7",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "started",
+      "summary": "Stage 2/6 — Extract",
+      "detail": {
+        "stage": "Extract",
+        "index": 1,
+        "description": "Parse layout, text, tables and fields",
+        "artifact": "Structured extraction"
+      },
+      "at": "2026-09-08T22:42:01.027Z"
+    },
+    {
+      "id": "27cb7e29-a56d-4d4a-83dc-bd3967ca2e40",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "mock_reasoning",
+      "status": "scripted",
+      "summary": "Scripted plan for \"Extract\": Parse layout, text, tables and fields → produce Structured extraction.",
+      "detail": {
+        "generator": "deterministic",
+        "model": null,
+        "note": "No language model was invoked. This is a scripted stand-in derived from data/services.json, not reasoning, and it must never be presented as agent judgement.",
+        "stage": "Extract"
+      },
+      "at": "2026-09-08T22:42:01.027Z"
+    },
+    {
+      "id": "d4c1ef0c-c1ee-4516-b0ba-f36e31ee9dc3",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "service-catalogue.read_service",
+      "detail": {
+        "capability": "live",
+        "input": {
+          "serviceId": "document-operations"
+        },
+        "resultPreview": {
+          "truncated": true,
+          "preview": "{\"kind\":\"service\",\"version\":\"0.1.0\",\"autonomy\":\"approval-gated\",\"core\":[\"Sara specialist runtime\",\"MNEMA customer facts and outcome memory\",\"Project Brain policies, approvals and evidence\",\"Postgres task, receipt and audit ledger\",\"Service Lab evaluation harness\"],\"approvals\":[\"Any external communication sent in the customer’s name\",\"Any irreversible write, delete, payment or permission change\",\"Any action below the configured confidence or policy threshold\"],\"risks\":[\"Sensitive document leakage and incorrect retention\",\"Prompt injection or untrusted instructions arriving through connected con…"
+        }
+      },
+      "at": "2026-09-08T22:42:01.050Z"
+    },
+    {
+      "id": "c3f71410-ae86-4a69-8c15-d101be1426a1",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "mock_executed",
+      "summary": "unboundpdf-docling.extract (lane:mock, synthetic)",
+      "detail": {
+        "lane": "mock",
+        "mock": true,
+        "opKind": "read",
+        "input": {
+          "documentId": "mock-ff5c7b220e"
+        },
+        "resultPreview": {
+          "mock": true,
+          "lane": "mock",
+          "disclaimer": "SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.",
+          "adapterId": "unboundpdf-docling",
+          "op": "extract",
+          "opKind": "read",
+          "declaredInput": [
+            "documentId"
+          ],
+          "receivedInput": [
+            "documentId"
+          ],
+          "fingerprint": "a72a828dff76",
+          "records": [
+            {
+              "id": "mock-unboundpdf-docling-a72a828d",
+              "source": "UnboundPDF + Docling",
+              "fields": {
+                "documentId": "mock:documentId:0251dc12"
+              },
+              "synthetic": true
+            }
+          ],
+          "note": "Synthetic records with the shape the real operation returns. Counts and contents mean nothing."
+        },
+        "note": "No credential was used and no external system was contacted."
+      },
+      "at": "2026-09-08T22:42:01.051Z"
+    },
+    {
+      "id": "7af5d046-892c-4122-b886-09e50d96c857",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "completed",
+      "summary": "Stage 2/6 — Extract complete (2 operation(s)).",
+      "detail": {
+        "stage": "Extract",
+        "index": 1,
+        "artifact": "Structured extraction",
+        "operations": 2,
+        "errors": 0,
+        "business": {
+          "carryOut": 56,
+          "label": "Extract: parse layout, text, tables and fields",
+          "counts": [
+            {
+              "n": 56,
+              "noun": "documents parsed"
+            },
+            {
+              "n": 29,
+              "noun": "fields extracted"
+            },
+            {
+              "n": 23,
+              "noun": "pages needing OCR"
+            }
+          ],
+          "unitsDeclared": true,
+          "note": "Synthetic demo data — the mock lane contacted no source and produced no client result. These numbers show the SHAPE of the answer, not an answer.",
+          "synthetic": true,
+          "stage": "Extract",
+          "pack": "Document Operations Agent",
+          "generator": "deterministic"
+        }
+      },
+      "at": "2026-09-08T22:42:01.051Z"
+    },
+    {
+      "id": "e15d3f64-8585-4b0f-8698-79580fe35faa",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "started",
+      "summary": "Stage 3/6 — Classify",
+      "detail": {
+        "stage": "Classify",
+        "index": 2,
+        "description": "Determine document type and intended process",
+        "artifact": "Document class"
+      },
+      "at": "2026-09-08T22:42:01.055Z"
+    },
+    {
+      "id": "ba909189-0b3c-40fe-946c-984c373c1ca5",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "mock_reasoning",
+      "status": "scripted",
+      "summary": "Scripted plan for \"Classify\": Determine document type and intended process → produce Document class.",
+      "detail": {
+        "generator": "deterministic",
+        "model": null,
+        "note": "No language model was invoked. This is a scripted stand-in derived from data/services.json, not reasoning, and it must never be presented as agent judgement.",
+        "stage": "Classify"
+      },
+      "at": "2026-09-08T22:42:01.055Z"
+    },
+    {
+      "id": "fcc34025-aa44-478e-a44b-4e7465097a4a",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "project-brain-policy.check",
+      "detail": {
+        "capability": "live",
+        "input": {
+          "subject": "document-operations"
+        },
+        "resultPreview": {
+          "truncated": true,
+          "preview": "{\"allowed\":true,\"serviceId\":\"document-operations\",\"matrix\":[{\"adapterId\":\"strategy-planner\",\"permission\":\"read-write\",\"note\":\"within matrix\"},{\"adapterId\":\"service-catalogue\",\"permission\":\"read\",\"note\":\"within matrix\"},{\"adapterId\":\"client-brief-builder\",\"permission\":\"read-write\",\"note\":\"within matrix\"},{\"adapterId\":\"project-brain-policy\",\"permission\":\"read\",\"note\":\"within matrix\"},{\"adapterId\":\"mnema-memory\",\"permission\":\"approval-gated-write\",\"note\":\"external writes require an approved action\"},{\"adapterId\":\"approval-inbox\",\"permission\":\"read-write\",\"note\":\"within matrix\"},{\"adapterId\":\"evid…"
+        }
+      },
+      "at": "2026-09-08T22:42:01.063Z"
+    },
+    {
+      "id": "131e7d8e-573b-4b01-814f-0b6b1d62e85e",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "mock_executed",
+      "summary": "paddleocr-or-tesseract.list_documents (lane:mock, synthetic)",
+      "detail": {
+        "lane": "mock",
+        "mock": true,
+        "opKind": "read",
+        "input": {},
+        "resultPreview": {
+          "mock": true,
+          "lane": "mock",
+          "disclaimer": "SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.",
+          "adapterId": "paddleocr-or-tesseract",
+          "op": "list_documents",
+          "opKind": "read",
+          "declaredInput": [],
+          "fingerprint": "12416cc0b4ae",
+          "truncated": true,
+          "preview": "{\"mock\":true,\"lane\":\"mock\",\"disclaimer\":\"SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.\",\"adapterId\":\"paddleocr-or-tesseract\",\"op\":\"list_documents\",\"opKind\":\"read\",\"declaredInput\":[],\"receivedInput\":[],\"fingerprint\":\"12416cc0b4ae\",\"records\":[{\"id\":\"mock-paddleocr-or-tesseract-12416cc0\",\"source\":\"PaddleOCR or Tesseract\",\"fields\":{},\"synthetic\":true},{\"id\":\"mock-paddleocr-or-tesseract-6cc0b4ae\",\"source\":\"PaddleOCR or Tesseract\",\"fields\":{},\"synthetic\":true},{\"id\":\"mock-paddleocr-or-tesseract-b4aeb6ab\",\"source\":\"PaddleOCR or Tessera…"
+        },
+        "note": "No credential was used and no external system was contacted."
+      },
+      "at": "2026-09-08T22:42:01.064Z"
+    },
+    {
+      "id": "99d97b61-45b1-4126-9f1e-00cb9cac9cc5",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "completed",
+      "summary": "Stage 3/6 — Classify complete (2 operation(s)).",
+      "detail": {
+        "stage": "Classify",
+        "index": 2,
+        "artifact": "Document class",
+        "operations": 2,
+        "errors": 0,
+        "business": {
+          "carryOut": 49,
+          "label": "Classify: determine document type and intended process",
+          "counts": [
+            {
+              "n": 49,
+              "noun": "documents classified"
+            },
+            {
+              "n": 30,
+              "noun": "document types found"
+            },
+            {
+              "n": 21,
+              "noun": "documents of unknown type"
+            }
+          ],
+          "unitsDeclared": true,
+          "note": "Synthetic demo data — the mock lane contacted no source and produced no client result. These numbers show the SHAPE of the answer, not an answer.",
+          "synthetic": true,
+          "stage": "Classify",
+          "pack": "Document Operations Agent",
+          "generator": "deterministic"
+        }
+      },
+      "at": "2026-09-08T22:42:01.064Z"
+    },
+    {
+      "id": "d1e9bc66-ad89-4d3e-9278-776b07c49fa3",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "started",
+      "summary": "Stage 4/6 — Validate",
+      "detail": {
+        "stage": "Validate",
+        "index": 3,
+        "description": "Apply schema, totals, duplicate and policy checks",
+        "artifact": "Validation report"
+      },
+      "at": "2026-09-08T22:42:01.068Z"
+    },
+    {
+      "id": "8bf0cdfe-6977-4a8b-afb9-dcf66bcd5381",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "mock_reasoning",
+      "status": "scripted",
+      "summary": "Scripted plan for \"Validate\": Apply schema, totals, duplicate and policy checks → produce Validation report.",
+      "detail": {
+        "generator": "deterministic",
+        "model": null,
+        "note": "No language model was invoked. This is a scripted stand-in derived from data/services.json, not reasoning, and it must never be presented as agent judgement.",
+        "stage": "Validate"
+      },
+      "at": "2026-09-08T22:42:01.068Z"
+    },
+    {
+      "id": "ddfe5a26-9fa7-420b-8454-4c1a63ede8e1",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "mnema-memory.query",
+      "detail": {
+        "capability": "live",
+        "input": {
+          "query": "Document Operations Agent"
+        },
+        "resultPreview": []
+      },
+      "at": "2026-09-08T22:42:01.069Z"
+    },
+    {
+      "id": "4c53718f-bd61-4a7f-bf22-bd4263b1ea17",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "mock_executed",
+      "summary": "paddleocr-or-tesseract.extract (lane:mock, synthetic)",
+      "detail": {
+        "lane": "mock",
+        "mock": true,
+        "opKind": "read",
+        "input": {
+          "documentId": "mock-d4704c80b0"
+        },
+        "resultPreview": {
+          "mock": true,
+          "lane": "mock",
+          "disclaimer": "SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.",
+          "adapterId": "paddleocr-or-tesseract",
+          "op": "extract",
+          "opKind": "read",
+          "declaredInput": [
+            "documentId"
+          ],
+          "fingerprint": "fd57169bd351",
+          "truncated": true,
+          "preview": "{\"mock\":true,\"lane\":\"mock\",\"disclaimer\":\"SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.\",\"adapterId\":\"paddleocr-or-tesseract\",\"op\":\"extract\",\"opKind\":\"read\",\"declaredInput\":[\"documentId\"],\"receivedInput\":[\"documentId\"],\"fingerprint\":\"fd57169bd351\",\"records\":[{\"id\":\"mock-paddleocr-or-tesseract-fd57169b\",\"source\":\"PaddleOCR or Tesseract\",\"fields\":{\"documentId\":\"mock:documentId:05aa7fdc\"},\"synthetic\":true},{\"id\":\"mock-paddleocr-or-tesseract-169bd351\",\"source\":\"PaddleOCR or Tesseract\",\"fields\":{\"documentId\":\"mock:documentId:5aa7fdc2\"…"
+        },
+        "note": "No credential was used and no external system was contacted."
+      },
+      "at": "2026-09-08T22:42:01.070Z"
+    },
+    {
+      "id": "f3356e87-46fd-4c08-a0c6-d3b35cb9bb06",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "gate",
+      "status": "resolved",
+      "summary": "Decision gate — “Is every required field on this document validated against something outside it — and can the write it would trigger be undone?” → Queue for human review: a required field is unvalidated, the totals do not reconcile, or a payment detail changed.",
+      "detail": {
+        "gateId": "document-boundary",
+        "question": "Is every required field on this document validated against something outside it — and can the write it would trigger be undone?",
+        "outcomes": [
+          "Write the validated record: every required field validated externally and the write can be undone",
+          "Hold as a suspected duplicate: the document number or the file checksum matches one already processed",
+          "Return to intake: the document cannot be parsed to its required fields, or matches no known type",
+          "Queue for human review: a required field is unvalidated, the totals do not reconcile, or a payment detail changed",
+          "Prepare and hold for the named approver: the write cannot be undone"
+        ],
+        "outcome": "Queue for human review: a required field is unvalidated, the totals do not reconcile, or a payment detail changed",
+        "pathId": "path-review",
+        "decidedBy": "Condition (3) of the document boundary, matched three times over. The gross figure does not equal net plus tax, so the arithmetic check that does not depend on any read confidence has failed. Two invoice lines have no counterpart on the purchase order. And the bank account printed on the invoice differs from the account on the supplier master record — which goes to a human regardless of confidence, because a forged payment instruction is usually rendered more cleanly than a genuine scan, and this is the one field where an accurate read of the wrong value moves money.",
+        "stage": "Validate",
+        "synthetic": true,
+        "note": "Sample simulation. This outcome is the service's own authored worked example (simulationFixture.branchResult) — a scripted decision, not a measured one."
+      },
+      "at": "2026-09-08T22:42:01.070Z"
+    },
+    {
+      "id": "eff28f3b-3eb3-4664-b83c-9e7a6d9f0b78",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "completed",
+      "summary": "Stage 4/6 — Validate complete (2 operation(s)).",
+      "detail": {
+        "stage": "Validate",
+        "index": 3,
+        "artifact": "Validation report",
+        "operations": 2,
+        "errors": 0,
+        "business": {
+          "carryOut": 46,
+          "label": "Validate: apply schema, totals, duplicate and policy checks",
+          "counts": [
+            {
+              "n": 46,
+              "noun": "documents validated"
+            },
+            {
+              "n": 21,
+              "noun": "checks passed"
+            },
+            {
+              "n": 14,
+              "noun": "checks failed"
+            }
+          ],
+          "unitsDeclared": true,
+          "note": "Synthetic demo data — the mock lane contacted no source and produced no client result. These numbers show the SHAPE of the answer, not an answer.",
+          "synthetic": true,
+          "stage": "Validate",
+          "pack": "Document Operations Agent",
+          "generator": "deterministic"
+        }
+      },
+      "at": "2026-09-08T22:42:01.070Z"
+    },
+    {
+      "id": "05a97df9-9b14-4f58-b940-b06454769b9a",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "started",
+      "summary": "Stage 5/6 — Review",
+      "detail": {
+        "stage": "Review",
+        "index": 4,
+        "description": "Queue low-confidence fields and exceptions",
+        "artifact": "Approval decision"
+      },
+      "at": "2026-09-08T22:42:01.076Z"
+    },
+    {
+      "id": "b7f7463d-2818-4ab9-a4b6-519b32e5baed",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "mock_reasoning",
+      "status": "scripted",
+      "summary": "Scripted plan for \"Review\": Queue low-confidence fields and exceptions → produce Approval decision.",
+      "detail": {
+        "generator": "deterministic",
+        "model": null,
+        "note": "No language model was invoked. This is a scripted stand-in derived from data/services.json, not reasoning, and it must never be presented as agent judgement.",
+        "stage": "Review"
+      },
+      "at": "2026-09-08T22:42:01.077Z"
+    },
+    {
+      "id": "97afa019-59e9-4eaf-8296-e7ea657f0096",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "docling-secure-storage.list_documents",
+      "detail": {
+        "capability": "live",
+        "input": {},
+        "resultPreview": {
+          "documents": [],
+          "note": "workspace empty"
+        }
+      },
+      "at": "2026-09-08T22:42:01.078Z"
+    },
+    {
+      "id": "bffe6680-e786-4052-8ae1-85a32f1327b6",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "mock_executed",
+      "summary": "s3-compatible-encrypted-storage.list_documents (lane:mock, synthetic)",
+      "detail": {
+        "lane": "mock",
+        "mock": true,
+        "opKind": "read",
+        "input": {},
+        "resultPreview": {
+          "mock": true,
+          "lane": "mock",
+          "disclaimer": "SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.",
+          "adapterId": "s3-compatible-encrypted-storage",
+          "op": "list_documents",
+          "opKind": "read",
+          "declaredInput": [],
+          "receivedInput": [],
+          "fingerprint": "e399e84572f6",
+          "records": [
+            {
+              "id": "mock-s3-compatible-encrypted-storage-e399e845",
+              "source": "S3-compatible encrypted storage",
+              "fields": {},
+              "synthetic": true
+            }
+          ],
+          "note": "Synthetic records with the shape the real operation returns. Counts and contents mean nothing."
+        },
+        "note": "No credential was used and no external system was contacted."
+      },
+      "at": "2026-09-08T22:42:01.078Z"
+    },
+    {
+      "id": "80ad2f8f-bc0c-4d28-befb-58db1c4c0117",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "completed",
+      "summary": "Stage 5/6 — Review complete (2 operation(s)).",
+      "detail": {
+        "stage": "Review",
+        "index": 4,
+        "artifact": "Approval decision",
+        "operations": 2,
+        "errors": 0,
+        "business": {
+          "carryOut": 40,
+          "label": "Review: queue low-confidence fields and exceptions",
+          "counts": [
+            {
+              "n": 40,
+              "noun": "documents in review"
+            },
+            {
+              "n": 20,
+              "noun": "fields corrected"
+            },
+            {
+              "n": 16,
+              "noun": "documents rejected"
+            }
+          ],
+          "unitsDeclared": true,
+          "note": "Synthetic demo data — the mock lane contacted no source and produced no client result. These numbers show the SHAPE of the answer, not an answer.",
+          "synthetic": true,
+          "stage": "Review",
+          "pack": "Document Operations Agent",
+          "generator": "deterministic"
+        }
+      },
+      "at": "2026-09-08T22:42:01.079Z"
+    },
+    {
+      "id": "e759b6ff-b124-4d76-acf7-e2e548320121",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "started",
+      "summary": "Stage 6/6 — Route",
+      "detail": {
+        "stage": "Route",
+        "index": 5,
+        "description": "Write approved data and archive the evidence",
+        "artifact": "Action receipt"
+      },
+      "at": "2026-09-08T22:42:01.083Z"
+    },
+    {
+      "id": "0a022a36-b8bd-4f14-8bd8-cdf3bc36189b",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "mock_reasoning",
+      "status": "scripted",
+      "summary": "Scripted plan for \"Route\": Write approved data and archive the evidence → produce Action receipt.",
+      "detail": {
+        "generator": "deterministic",
+        "model": null,
+        "note": "No language model was invoked. This is a scripted stand-in derived from data/services.json, not reasoning, and it must never be presented as agent judgement.",
+        "stage": "Route"
+      },
+      "at": "2026-09-08T22:42:01.083Z"
+    },
+    {
+      "id": "07aba94c-815e-46da-a989-cd8932884eb6",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "evidence-ledger.bundle",
+      "detail": {
+        "capability": "live",
+        "input": {},
+        "resultPreview": {
+          "lane": "mock",
+          "truncated": true,
+          "preview": "{\"schema\":\"vvdex.evidence-bundle/v1\",\"runId\":\"37c494ba-14b8-40ec-b262-1f006ac7235e\",\"lane\":\"mock\",\"generatedAt\":\"2026-09-08T22:42:01.084Z\",\"totals\":{\"receipts\":32,\"toolCalls\":10,\"refused\":0,\"proposals\":0,\"externalSends\":0,\"mockExecutions\":5},\"sha256\":\"b4473488fb7fe7152c6dedd0de510eaa7ddebb98b52d375f3a2ed9feab13e964\",\"receipts\":[{\"id\":\"581421f5-c4fc-4638-9a55-ddb253a93ad4\",\"runId\":\"37c494ba-14b8-40ec-b262-1f006ac7235e\",\"lane\":\"mock\",\"kind\":\"run\",\"status\":\"created\",\"summary\":\"Run created for specialist-document-operations\",\"detail\":{\"tenantId\":\"demo:b02e8116-6a52-4dde-b1af-3581d9e06882\",\"budgetC…"
+        }
+      },
+      "at": "2026-09-08T22:42:01.085Z"
+    },
+    {
+      "id": "40dc4856-b06f-49b6-9ab5-033b2857430f",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "mock_executed",
+      "summary": "s3-compatible-encrypted-storage.extract (lane:mock, synthetic)",
+      "detail": {
+        "lane": "mock",
+        "mock": true,
+        "opKind": "read",
+        "input": {
+          "documentId": "mock-402e66f1d0"
+        },
+        "resultPreview": {
+          "mock": true,
+          "lane": "mock",
+          "disclaimer": "SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.",
+          "adapterId": "s3-compatible-encrypted-storage",
+          "op": "extract",
+          "opKind": "read",
+          "declaredInput": [
+            "documentId"
+          ],
+          "fingerprint": "57ca6e75f940",
+          "truncated": true,
+          "preview": "{\"mock\":true,\"lane\":\"mock\",\"disclaimer\":\"SYNTHETIC — produced by the mock lane. No client system was contacted and no credential was used. Not a result.\",\"adapterId\":\"s3-compatible-encrypted-storage\",\"op\":\"extract\",\"opKind\":\"read\",\"declaredInput\":[\"documentId\"],\"receivedInput\":[\"documentId\"],\"fingerprint\":\"57ca6e75f940\",\"records\":[{\"id\":\"mock-s3-compatible-encrypted-storage-57ca6e75\",\"source\":\"S3-compatible encrypted storage\",\"fields\":{\"documentId\":\"mock:documentId:390c338e\"},\"synthetic\":true}],\"note\":\"Synthetic records with the shape the real operation returns. Counts and contents mean nothin…"
+        },
+        "note": "No credential was used and no external system was contacted."
+      },
+      "at": "2026-09-08T22:42:01.085Z"
+    },
+    {
+      "id": "b9cc1dba-2b04-491e-804e-83713d920b54",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "stage",
+      "status": "completed",
+      "summary": "Stage 6/6 — Route complete (2 operation(s)).",
+      "detail": {
+        "stage": "Route",
+        "index": 5,
+        "artifact": "Action receipt",
+        "operations": 2,
+        "errors": 0,
+        "business": {
+          "carryOut": 30,
+          "label": "Route: write approved data and archive the evidence",
+          "counts": [
+            {
+              "n": 30,
+              "noun": "records written"
+            },
+            {
+              "n": 23,
+              "noun": "documents archived"
+            },
+            {
+              "n": 18,
+              "noun": "writes that failed"
+            }
+          ],
+          "unitsDeclared": true,
+          "note": "Synthetic demo data — the mock lane contacted no source and produced no client result. These numbers show the SHAPE of the answer, not an answer.",
+          "synthetic": true,
+          "stage": "Route",
+          "pack": "Document Operations Agent",
+          "generator": "deterministic"
+        }
+      },
+      "at": "2026-09-08T22:42:01.085Z"
+    },
+    {
+      "id": "696d17fc-fd0c-47b7-be1d-65ef61899798",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "evidence",
+      "status": "artifact",
+      "summary": "Artifact written: described-outputs.md (1551 bytes).",
+      "detail": {
+        "name": "described-outputs.md",
+        "storedAs": "37c494ba-14b8-40ec-b262-1f006ac7235e.described-outputs.md",
+        "bytes": 1551,
+        "kind": "markdown",
+        "synthetic": true,
+        "description": "The outputs this service says a live run produces, in its own words. No file body was produced and none was invented.",
+        "tenantId": "demo:b02e8116-6a52-4dde-b1af-3581d9e06882"
+      },
+      "at": "2026-09-08T22:42:01.089Z"
+    },
+    {
+      "id": "c692328f-1459-407c-b1b2-d3f8d2c7903f",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "evidence",
+      "status": "artifact",
+      "summary": "Artifact written: prepared-action.sample.md (1277 bytes).",
+      "detail": {
+        "name": "prepared-action.sample.md",
+        "storedAs": "37c494ba-14b8-40ec-b262-1f006ac7235e.prepared-action.sample.md",
+        "bytes": 1277,
+        "kind": "markdown",
+        "synthetic": true,
+        "description": "The outgoing action as it would be shown to a human for approval. Nothing was sent.",
+        "tenantId": "demo:b02e8116-6a52-4dde-b1af-3581d9e06882"
+      },
+      "at": "2026-09-08T22:42:01.089Z"
+    },
+    {
+      "id": "35e3264b-36a7-437f-8d09-398de8b0d8cc",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "run",
+      "status": "described_outputs",
+      "summary": "This service describes what a run of it produces rather than shipping a sample document. No document body was produced for these outputs, and none was invented or substituted from another service. This service describes 7 outputs: “An immutable source record with the file checksum, the sender and the receipt time, and the original stored unmodified”; “An extraction of 58 values, each carrying its page and region and the confidence of the read”; “A classification as a supplier invoice, with that type's required-field schema applied”; “A validation report in which 4 checks passed and 3 failed: the totals reconciliation, the purchase-order line match, and the required-field thresholds”; “The changed bank account shown beside the supplier master record's account, with the page it was read from”; “A review queue holding the document with the three failed checks and the specific pages a reviewer needs to read”; “No record written to the business system, no payment prepared and no reply to the invoice's own address”.",
+      "detail": {
+        "pack": "document-operations",
+        "sampleOutputs": 7,
+        "fileOutputs": 0,
+        "describedOutputs": [
+          "An immutable source record with the file checksum, the sender and the receipt time, and the original stored unmodified",
+          "An extraction of 58 values, each carrying its page and region and the confidence of the read",
+          "A classification as a supplier invoice, with that type's required-field schema applied",
+          "A validation report in which 4 checks passed and 3 failed: the totals reconciliation, the purchase-order line match, and the required-field thresholds",
+          "The changed bank account shown beside the supplier master record's account, with the page it was read from",
+          "A review queue holding the document with the three failed checks and the specific pages a reviewer needs to read",
+          "No record written to the business system, no payment prepared and no reply to the invoice's own address"
+        ]
+      },
+      "at": "2026-09-08T22:42:01.090Z"
+    },
+    {
+      "id": "5fc15ba2-e899-49f2-8dc8-f67a5913a617",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "run",
+      "status": "business_summary",
+      "summary": "Business summary: 82 documents received, 18 writes that failed.",
+      "detail": {
+        "stages": 6,
+        "counts": [
+          {
+            "n": 82,
+            "noun": "documents received"
+          },
+          {
+            "n": 18,
+            "noun": "writes that failed"
+          }
+        ],
+        "perStage": [
+          {
+            "stage": "Ingest",
+            "label": "Ingest: capture source, sender, checksum and tenant",
+            "counts": [
+              {
+                "n": 82,
+                "noun": "documents received"
+              },
+              {
+                "n": 34,
+                "noun": "documents stored"
+              },
+              {
+                "n": 21,
+                "noun": "documents rejected at intake"
+              }
+            ]
+          },
+          {
+            "stage": "Extract",
+            "label": "Extract: parse layout, text, tables and fields",
+            "counts": [
+              {
+                "n": 56,
+                "noun": "documents parsed"
+              },
+              {
+                "n": 29,
+                "noun": "fields extracted"
+              },
+              {
+                "n": 23,
+                "noun": "pages needing OCR"
+              }
+            ]
+          },
+          {
+            "stage": "Classify",
+            "label": "Classify: determine document type and intended process",
+            "counts": [
+              {
+                "n": 49,
+                "noun": "documents classified"
+              },
+              {
+                "n": 30,
+                "noun": "document types found"
+              },
+              {
+                "n": 21,
+                "noun": "documents of unknown type"
+              }
+            ]
+          },
+          {
+            "stage": "Validate",
+            "label": "Validate: apply schema, totals, duplicate and policy checks",
+            "counts": [
+              {
+                "n": 46,
+                "noun": "documents validated"
+              },
+              {
+                "n": 21,
+                "noun": "checks passed"
+              },
+              {
+                "n": 14,
+                "noun": "checks failed"
+              }
+            ]
+          },
+          {
+            "stage": "Review",
+            "label": "Review: queue low-confidence fields and exceptions",
+            "counts": [
+              {
+                "n": 40,
+                "noun": "documents in review"
+              },
+              {
+                "n": 20,
+                "noun": "fields corrected"
+              },
+              {
+                "n": 16,
+                "noun": "documents rejected"
+              }
+            ]
+          },
+          {
+            "stage": "Route",
+            "label": "Route: write approved data and archive the evidence",
+            "counts": [
+              {
+                "n": 30,
+                "noun": "records written"
+              },
+              {
+                "n": 23,
+                "noun": "documents archived"
+              },
+              {
+                "n": 18,
+                "noun": "writes that failed"
+              }
+            ]
+          }
+        ],
+        "synthetic": true,
+        "note": "Synthetic demo data — nothing here was discovered, verified or sent.",
+        "generator": "deterministic",
+        "artifacts": [
+          {
+            "name": "described-outputs.md",
+            "bytes": 1551,
+            "kind": "markdown"
+          },
+          {
+            "name": "prepared-action.sample.md",
+            "bytes": 1277,
+            "kind": "markdown"
+          }
+        ],
+        "lane": "mock"
+      },
+      "at": "2026-09-08T22:42:01.090Z"
+    },
+    {
+      "id": "21a60945-a942-4224-880e-12a6885ad551",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "tool",
+      "status": "executed",
+      "summary": "docling-secure-storage.store_document",
+      "detail": {
+        "capability": "live",
+        "input": {
+          "truncated": true,
+          "preview": "{\"name\":\"document-operations-37c494ba-14b8-40ec-b262-1f006ac7235e.md\",\"content\":\"# Document Operations Agent — run report\\n\\n- Run: 37c494ba-14b8-40ec-b262-1f006ac7235e\\n- Lane: **MOCK** — SYNTHETIC. No client system was contacted; nothing here is a result.\\n- Pack outcome (as catalogued): A measurable straight-through document pipeline with field-level evidence and human review where needed.\\n- Team compiled: 6 agents, 13 blueprint nodes\\n\\n## Workflow stages executed\\n\\n| # | Stage | Artifact | Operations | Errors | Evidence |\\n|---|---|---|---|---|---|\\n| 1 | Ingest | Immutable source recor…"
+        },
+        "resultPreview": {
+          "stored": "document-operations-37c494ba-14b8-40ec-b262-1f006ac7235e.md",
+          "bytes": 1551
+        }
+      },
+      "at": "2026-09-08T22:42:01.092Z"
+    },
+    {
+      "id": "fa0a14f8-7b9b-4072-bc3a-8d48f1ed6057",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "evidence",
+      "status": "artifact",
+      "summary": "Artifact written: document-operations-37c494ba-14b8-40ec-b262-1f006ac7235e.md (1555 bytes).",
+      "detail": {
+        "name": "document-operations-37c494ba-14b8-40ec-b262-1f006ac7235e.md",
+        "storedAs": "document-operations-37c494ba-14b8-40ec-b262-1f006ac7235e.md",
+        "bytes": 1555,
+        "kind": "markdown",
+        "synthetic": true,
+        "description": "The run report, compiled from this run's own receipts with citations.",
+        "tenantId": "demo:b02e8116-6a52-4dde-b1af-3581d9e06882"
+      },
+      "at": "2026-09-08T22:42:01.092Z"
+    },
+    {
+      "id": "d63dcc97-e0e2-4750-a011-18ecc53d5e7d",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "cost",
+      "status": "mock_lane",
+      "summary": "Mock lane: no model was invoked. 0 tokens · €0",
+      "detail": {
+        "lane": "mock",
+        "modelCalls": 0,
+        "note": "€0 because nothing was purchased — not because a price was assumed. data/model-rates.json is untouched.",
+        "budget": {
+          "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+          "tokensUsed": 0,
+          "tokenBudget": 120000,
+          "centsUsed": 0,
+          "centsBudget": null,
+          "unpricedTokens": 0,
+          "costComplete": true,
+          "meteringReliable": true,
+          "exhausted": false,
+          "halt": false,
+          "haltStatus": null,
+          "reason": null
+        }
+      },
+      "at": "2026-09-08T22:42:01.092Z"
+    },
+    {
+      "id": "7c01d961-248b-4617-bf6e-10874d0dbb59",
+      "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+      "lane": "mock",
+      "kind": "verify",
+      "status": "passed",
+      "summary": "Structural verifier PASS (9 checks)",
+      "detail": {
+        "method": "structural",
+        "note": "Structural checks only — no model judged the deliverable's meaning. Use verifyRun() with an LLM credential for that.",
+        "checks": [
+          {
+            "id": "receipts_present",
+            "ok": true,
+            "detail": "42 receipt(s) in the ledger"
+          },
+          {
+            "id": "every_stage_receipted",
+            "ok": true,
+            "detail": "6/6 stages receipted"
+          },
+          {
+            "id": "no_tool_errors",
+            "ok": true,
+            "detail": "no adapter threw"
+          },
+          {
+            "id": "no_unapproved_external_send",
+            "ok": true,
+            "detail": "0 external send(s) against 0 approval(s)"
+          },
+          {
+            "id": "mock_lane_used_no_credential",
+            "ok": true,
+            "detail": "0 credentialed tool call(s) in a mock run"
+          },
+          {
+            "id": "mock_lane_made_no_network_call",
+            "ok": true,
+            "detail": "0 external network attempt(s) (0 refused by the lane guard)"
+          },
+          {
+            "id": "mock_results_are_marked",
+            "ok": true,
+            "detail": "6 mock execution(s), all marked lane:mock"
+          },
+          {
+            "id": "budget_accounted",
+            "ok": true,
+            "detail": "0 tokens · €0"
+          },
+          {
+            "id": "citations_resolve",
+            "ok": true,
+            "detail": "6 citation(s) resolve"
+          }
+        ],
+        "failures": [],
+        "lane": "mock",
+        "budget": {
+          "runId": "37c494ba-14b8-40ec-b262-1f006ac7235e",
+          "tokensUsed": 0,
+          "tokenBudget": 120000,
+          "centsUsed": 0,
+          "centsBudget": null,
+          "unpricedTokens": 0,
+          "costComplete": true,
+          "meteringReliable": true,
+          "exhausted": false,
+          "halt": false,
+          "haltStatus": null,
+          "reason": null
+        }
+      },
+      "at": "2026-09-08T22:42:01.095Z"
+    }
+  ]
+}

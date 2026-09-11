@@ -1,0 +1,103 @@
+{
+  "id": "mcp-integration-project-base",
+  "name": "MCP Integration project base",
+  "serviceId": "mcp-integration",
+  "version": "0.1.0",
+  "status": "ready-to-adapt",
+  "agentIds": [
+    "vvdex-strategy",
+    "vvdex-orchestrator",
+    "sara-intake",
+    "specialist-mcp-integration",
+    "connector-steward",
+    "project-brain",
+    "evidence-qa"
+  ],
+  "toolIds": [
+    "client-systems-of-record",
+    "client-hosted-mcp-server",
+    "vvdex-mcp-conformance",
+    "client-tracing"
+  ],
+  "edges": [
+    [
+      "sara-intake",
+      "vvdex-strategy"
+    ],
+    [
+      "vvdex-strategy",
+      "vvdex-orchestrator"
+    ],
+    [
+      "vvdex-orchestrator",
+      "specialist-mcp-integration"
+    ],
+    [
+      "specialist-mcp-integration",
+      "connector-steward"
+    ],
+    [
+      "connector-steward",
+      "project-brain"
+    ],
+    [
+      "project-brain",
+      "evidence-qa"
+    ],
+    [
+      "evidence-qa",
+      "vvdex-orchestrator"
+    ]
+  ],
+  "requiredClientInputs": [
+    {
+      "id": "system-and-owner",
+      "question": "Which system is being exposed, and who owns what happens inside it?",
+      "recommendation": "One system per server and one named owner for it — the person who answers for the records it holds and who can revoke the server's credential without asking anybody. A server that exposes three systems is three contracts in one file and cannot be approved tool by tool. Where the system is shared across departments, the owner is whoever is accountable for its data, not whoever administers the software.",
+      "whyAsking": "Every approval in this engagement is that person's, and the contract is a statement about their system that they have to be able to read and refuse.",
+      "blocking": true,
+      "kind": "owner"
+    },
+    {
+      "id": "tools-and-scopes",
+      "question": "Which tools should the assistant have, and what is the narrowest scope each one needs?",
+      "recommendation": "List the jobs the assistant is meant to do, then write the smallest tool for each — search tickets in one queue rather than read the ticket database; comment on a ticket rather than update any field on it. Each tool states its scope in the contract, and the credential behind it is cut to that scope rather than the other way round. Anything that cannot be narrowed is written down as a tool the contract refuses.",
+      "whyAsking": "The tool list is the actual permission model: whatever is in it is what an assistant can do on a bad day, not only on a good one.",
+      "blocking": true,
+      "kind": "permission"
+    },
+    {
+      "id": "write-side",
+      "question": "Which of those tools write, and what does a duplicate of each write look like?",
+      "recommendation": "Separate the read tools from the write tools in the contract and, for each write, describe the duplicate: two tickets, two comments, two refunds. Every write-capable tool carries an idempotency key derived from the caller's intent, and the key is replayed as a test rather than assumed to work. A write that cannot be made idempotent is not offered as a tool; it is proposed as a draft for a person to apply.",
+      "whyAsking": "A retry is the normal behaviour of every agent and every network, so a write tool without a replayed key is a duplicate waiting for its first bad afternoon.",
+      "blocking": true,
+      "kind": "schema"
+    },
+    {
+      "id": "untrusted-content",
+      "question": "Does any tool return content that people outside the business wrote?",
+      "recommendation": "Almost always yes — ticket bodies, customer emails, CRM notes, form submissions — and that content reaches the model as instructions unless the server is built to stop it. Name those tools up front: their results are probed for injection, they are marked in the contract, and no write-capable tool may be reachable in the same turn as one of them without a fresh approval. Assume the content is hostile and build for it rather than testing for politeness.",
+      "whyAsking": "Injection arriving through a tool result is the failure mode this pack exists for, and it is the one a client cannot see from the outside.",
+      "blocking": true,
+      "kind": "policy"
+    },
+    {
+      "id": "hosting-and-credential",
+      "question": "Where does the server run, and whose credential does it hold?",
+      "recommendation": "Inside the client's own boundary, holding a credential the client issued and can revoke without us. Where a client asks us to host it, the honest answer is that they then depend on a credential VVDex holds and a process VVDex controls, and that is written down rather than discovered later. The deployment package is prepared for the client's platform; nothing is deployed on their behalf.",
+      "whyAsking": "Where the server runs decides who can switch it off, and that is the only control a client keeps after everything else is delegated.",
+      "blocking": false,
+      "kind": "other",
+      "default": "Inside the client's own boundary, holding a client-issued credential the client can revoke without us, with the deployment package prepared for them to apply."
+    }
+  ],
+  "completionEvidence": [
+    "Tool contract",
+    "Server build",
+    "Conformance results",
+    "Safety probe results",
+    "Independent contract check",
+    "Prepared deployment package"
+  ]
+}

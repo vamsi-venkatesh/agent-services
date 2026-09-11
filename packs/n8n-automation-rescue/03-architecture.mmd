@@ -1,0 +1,27 @@
+flowchart LR
+  C1["Operator workspace"] --> G
+  C2["Client workflow export"] --> G
+  C3["Client execution log"] --> G
+  C4["Handover session"] --> G
+  G["Tenant · identity · consent gateway"] --> S["n8n Automation Rescue"]
+  S --> R["Retrieve permitted context"]
+  R --> P["Policy and confidence check"]
+  P -->|read only| T["Typed tool adapters"]
+  P -->|consequential| H["Human approval"]
+  H --> T
+  T --> V["Verify external state"]
+  V --> E["Receipt · outcome · audit"]
+  E --> M["MNEMA verified memory"]
+  X1["Workflow platform: Existing n8n"]
+  X2["Workflow export and executions: Client-supplied workflow export"]
+  X3["Run observability: Client tracing"]
+  X4["Workflow diagnosis: VVDex Workflow Diagnosis"]
+  T <--> X1
+  T <--> X2
+  T <--> X3
+  T <--> X4
+
+  classDef agent fill:#2457ff,color:#fff,stroke:#2457ff;
+  classDef human fill:#c8ff4d,color:#151515,stroke:#151515;
+  class S agent;
+  class H human;

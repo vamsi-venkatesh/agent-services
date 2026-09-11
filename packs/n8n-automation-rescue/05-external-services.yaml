@@ -1,0 +1,28 @@
+service: n8n-automation-rescue
+selection_rules:
+  - Prefer the customer system of record over introducing a duplicate platform.
+  - Prefer APIs and typed connectors over browser automation.
+  - Use least-privilege, per-tenant credentials with revocation.
+  - Treat a hosted service's commercial terms as a decision separate from its technical fit.
+  - Record data region, subprocessors, retention and failure behavior.
+services:
+  - capability: "Workflow platform"
+    preferred: "Existing n8n"
+    alternatives: "Make, Zapier, Activepieces"
+    requirement: "Required"
+    note: "The client's own instance is where the workflow runs and the only place a repaired version is ever imported — the export we work from comes out of it and the fix goes back into it"
+  - capability: "Workflow export and executions"
+    preferred: "Client-supplied workflow export"
+    alternatives: "Instance API export, manual JSON export"
+    requirement: "Required"
+    note: "The failing workflow as JSON together with the failing execution ids: the whole rescue is reproduced from those two artifacts and nothing else"
+  - capability: "Run observability"
+    preferred: "Client tracing"
+    alternatives: "n8n execution log, client trace store"
+    requirement: "Required"
+    note: "The client's own tracing, bound with the client's own credential, so the failing and the patched replays are read side by side from the traces rather than asserted"
+  - capability: "Workflow diagnosis"
+    preferred: "VVDex Workflow Diagnosis"
+    alternatives: "Custom fixtures"
+    requirement: "Required"
+    note: "The exported workflow is diffed node by node, the failure family is classified from the recorded executions, and the reproduction case is frozen as a test, so the fix is proven against the failure that started the engagement"

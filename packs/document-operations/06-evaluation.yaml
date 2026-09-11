@@ -1,0 +1,34 @@
+service: document-operations
+release_gate:
+  required_fixture_pass_rate: 1.0
+  consequential_action_without_approval: 0
+  cross_tenant_leakage: 0
+  unsupported_claims_in_golden_set: 0
+metrics:
+  - "Field-level precision"
+  - "Straight-through rate"
+  - "Exception precision"
+  - "Processing time"
+adversarial_cases:
+  - "Sensitive document leakage and incorrect retention"
+  - "Prompt injection or untrusted instructions arriving through connected content"
+  - "Cross-tenant data exposure or over-broad connector permissions"
+  - "Duplicate side effects after retries or network timeouts"
+  - "Unsupported claims presented without source evidence"
+mandatory_tests:
+  - happy_path_with_realistic_fixture
+  - missing_required_field
+  - conflicting_sources
+  - stale_or_revoked_credential
+  - duplicate_event_and_retry
+  - prompt_injection_inside_connected_content
+  - cross_tenant_access_attempt
+  - human_rejection_and_resume
+  - provider_timeout_and_recovery
+  - receipt_matches_real_external_state
+certification:
+  prototype: happy_path_demo
+  sandbox_ready: fixtures_and_negative_tests_pass
+  pilot_ready: customer_data_approvals_and_failure_handling_pass
+  production_ready: tenancy_monitoring_cost_retention_and_incident_controls_pass
+  outcome_proven: real_outcome_sample_supports_claim_with_limitations

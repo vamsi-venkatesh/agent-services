@@ -1,0 +1,28 @@
+service: mcp-integration
+selection_rules:
+  - Prefer the customer system of record over introducing a duplicate platform.
+  - Prefer APIs and typed connectors over browser automation.
+  - Use least-privilege, per-tenant credentials with revocation.
+  - Treat a hosted service's commercial terms as a decision separate from its technical fit.
+  - Record data region, subprocessors, retention and failure behavior.
+services:
+  - capability: "Systems in scope"
+    preferred: "Client systems of record"
+    alternatives: "Ticketing system, CRM, client database"
+    requirement: "Required"
+    note: "The one system the server exposes, named with its own owner before a single tool is written, because the contract is a statement about that system and no other"
+  - capability: "Server runtime"
+    preferred: "Client-hosted MCP server"
+    alternatives: "Client container platform, client serverless runtime"
+    requirement: "Required"
+    note: "The server runs inside the client's own boundary and holds the client's own credential, so nothing on the path depends on a credential VVDex holds"
+  - capability: "Contract conformance and safety probes"
+    preferred: "VVDex MCP Conformance"
+    alternatives: "Custom probe set, custom fixtures"
+    requirement: "Required"
+    note: "Every tool's scope, read or write side, error shape and idempotency replay run as contract tests per tool and per build, and the same lane probes injection arriving through a tool result and scope escalation on the built server before any write-capable tool is offered"
+  - capability: "Run observability"
+    preferred: "Client tracing"
+    alternatives: "Client trace store, client log pipeline"
+    requirement: "Required"
+    note: "The client's own tracing, bound with the client's own credential, records every tool call, refusal and approval per tool, so a probe result can be traced back to the call that produced it"

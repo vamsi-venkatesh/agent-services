@@ -1,0 +1,104 @@
+{
+  "id": "n8n-automation-rescue-project-base",
+  "name": "n8n Automation Rescue project base",
+  "serviceId": "n8n-automation-rescue",
+  "version": "0.1.0",
+  "status": "ready-to-adapt",
+  "agentIds": [
+    "vvdex-strategy",
+    "vvdex-orchestrator",
+    "sara-intake",
+    "specialist-n8n-automation-rescue",
+    "connector-steward",
+    "project-brain",
+    "evidence-qa"
+  ],
+  "toolIds": [
+    "existing-n8n",
+    "client-supplied-workflow-export",
+    "client-tracing",
+    "vvdex-workflow-diagnosis"
+  ],
+  "edges": [
+    [
+      "sara-intake",
+      "vvdex-strategy"
+    ],
+    [
+      "vvdex-strategy",
+      "vvdex-orchestrator"
+    ],
+    [
+      "vvdex-orchestrator",
+      "specialist-n8n-automation-rescue"
+    ],
+    [
+      "specialist-n8n-automation-rescue",
+      "connector-steward"
+    ],
+    [
+      "connector-steward",
+      "project-brain"
+    ],
+    [
+      "project-brain",
+      "evidence-qa"
+    ],
+    [
+      "evidence-qa",
+      "vvdex-orchestrator"
+    ]
+  ],
+  "requiredClientInputs": [
+    {
+      "id": "workflow-export",
+      "question": "Which workflow is failing, and can you export it as JSON together with the ids of the failing executions?",
+      "recommendation": "One workflow, exported from the instance it actually runs on, plus the execution ids of at least three failures and two successes. The successes matter as much as the failures: the difference between them is usually where the cause is. Export rather than screenshot — a rescue reproduced from a description of a workflow is a guess, and the export is also what the prepared diff is computed against.",
+      "whyAsking": "The export and the executions are the entire evidence base: without them nothing can be replayed, and a fix that was never replayed is a change rather than a repair.",
+      "blocking": true,
+      "kind": "schema"
+    },
+    {
+      "id": "failure-shape",
+      "question": "What does the failure look like from the business's side, and how often does it happen?",
+      "recommendation": "Describe what a person notices — the invoice that never reached the accounting system, the lead that arrived twice — and attach a count over a stated window, for example nine of the last two hundred runs in the last fourteen days. A workflow that fails loudly and one that quietly writes half a record are different engagements, and the second is the one that has usually been running wrong for months.",
+      "whyAsking": "The business symptom decides which executions are worth replaying, and the rate is the number the repair has to move to be called proven.",
+      "blocking": true,
+      "kind": "other"
+    },
+    {
+      "id": "instance-and-owner",
+      "question": "Which instance does it run on, and who is allowed to import a change into it?",
+      "recommendation": "Name the instance and one person who can both approve the import and undo it afterwards. That person is the single gate this engagement has: nothing is imported without them, and the prepared package is written for them to apply rather than for us to apply on their behalf. Where an agency or a former contractor administers the instance, the owner is whoever can revoke that access, not whoever holds it today.",
+      "whyAsking": "Everything after the diagnosis is a change to a system we do not own, and this is the person who authorizes it and can put it back.",
+      "blocking": true,
+      "kind": "owner"
+    },
+    {
+      "id": "credentials-in-scope",
+      "question": "Which credentials does the workflow use, and may we see their scopes without their secrets?",
+      "recommendation": "List the connected accounts, what each one is allowed to do and when it was last rotated — the scopes, never the secrets. Expired and over-broad credentials are two of the four failure families and both are visible from the scope list alone. Nothing is bound to the rescue: the reproduction runs against recorded executions with every credential stubbed, which is why the secrets are never needed.",
+      "whyAsking": "Credential and authorization failures are the most common cause and the cheapest to exclude, and excluding them from a scope list costs the client no exposure at all.",
+      "blocking": false,
+      "kind": "permission",
+      "default": "Scopes and rotation dates only, listed from the instance's credential page. No secret is shared and nothing is bound to the rescue lane."
+    },
+    {
+      "id": "log-privacy",
+      "question": "May the execution log leave the instance, and does it carry personal data?",
+      "recommendation": "Assume it does until somebody has looked: execution data holds whatever passed through the workflow, which is usually customer records. The default is that the log stays where it is and only the fields the reproduction needs are extracted, with the rest redacted before anything is copied. Where a client permits the whole log to be exported, that decision is recorded in the rescue brief with the date and the person who made it.",
+      "whyAsking": "The execution log is the most sensitive artifact in the engagement and the easiest to copy without thinking, so the answer is settled before the first export.",
+      "blocking": false,
+      "kind": "policy",
+      "default": "The log stays on the instance; only the fields the reproduction needs are extracted and everything else is redacted before anything is copied."
+    }
+  ],
+  "completionEvidence": [
+    "Rescue brief",
+    "Deterministic failure case",
+    "Root cause with evidence",
+    "Workflow diff",
+    "Independent check report",
+    "Prepared import package"
+  ]
+}

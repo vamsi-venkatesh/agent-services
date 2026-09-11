@@ -1,0 +1,303 @@
+{
+  "schema": "vvdex.service-graph/v1",
+  "serviceId": "document-operations",
+  "name": "Document Operations Agent",
+  "category": "Back office",
+  "family": "document_transaction",
+  "riskClass": "high",
+  "serviceVersion": "0.1.0",
+  "graphVersion": "85ef02684743-g2",
+  "definitionHash": "85ef026847434b82d9d9e9031ccc826f8bc70a12493d8c699d491500a261e9ba",
+  "startNodeId": "email_attachment",
+  "nodeCount": 19,
+  "edgeCount": 21,
+  "humanGateCount": 1,
+  "nodes": [
+    {
+      "id": "email_attachment",
+      "label": "Email attachment",
+      "type": "intake",
+      "index": 0,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "extract",
+      "label": "Extract invoice fields",
+      "type": "model_reasoning",
+      "index": 1,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "supplier_bank_check",
+      "label": "Supplier and bank check",
+      "type": "parallel_worker",
+      "index": 2,
+      "concurrencyGroup": "invoice_checks",
+      "sideEffect": "none"
+    },
+    {
+      "id": "amount_vat_check",
+      "label": "Amount and VAT check",
+      "type": "parallel_worker",
+      "index": 3,
+      "concurrencyGroup": "invoice_checks",
+      "sideEffect": "none"
+    },
+    {
+      "id": "purchase_order_check",
+      "label": "Purchase-order check",
+      "type": "parallel_worker",
+      "index": 4,
+      "concurrencyGroup": "invoice_checks",
+      "sideEffect": "none"
+    },
+    {
+      "id": "duplicate_check",
+      "label": "Duplicate check",
+      "type": "parallel_worker",
+      "index": 5,
+      "concurrencyGroup": "invoice_checks",
+      "sideEffect": "none"
+    },
+    {
+      "id": "check_aggregate",
+      "label": "Assemble validation report",
+      "type": "aggregator",
+      "index": 6,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "independent_verifier",
+      "label": "Independent invoice verifier",
+      "type": "independent_verifier",
+      "index": 7,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "policy_decision",
+      "label": "Did all required invoice checks pass?",
+      "type": "policy_decision",
+      "index": 8,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "clean_result",
+      "label": "Save and update tracker",
+      "type": "side_effect_preparation",
+      "index": 9,
+      "concurrencyGroup": null,
+      "sideEffect": "prepared"
+    },
+    {
+      "id": "exception_gate",
+      "label": "Review listed mismatch",
+      "type": "human_gate",
+      "index": 10,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "approved_result",
+      "label": "Prepare approved override",
+      "type": "side_effect_preparation",
+      "index": 11,
+      "concurrencyGroup": null,
+      "sideEffect": "authorized"
+    },
+    {
+      "id": "result_verification",
+      "label": "Verify prepared record",
+      "type": "result_verification",
+      "index": 12,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "approved_verification",
+      "label": "Verify approved override",
+      "type": "result_verification",
+      "index": 13,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "clean_receipt",
+      "label": "Clean invoice receipt",
+      "type": "terminal",
+      "index": 14,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "approved_receipt",
+      "label": "Approved override receipt",
+      "type": "terminal",
+      "index": 15,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "rejected_receipt",
+      "label": "Rejected invoice receipt",
+      "type": "terminal",
+      "index": 16,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "duplicate_receipt",
+      "label": "Duplicate held receipt",
+      "type": "terminal",
+      "index": 17,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "intake_return_receipt",
+      "label": "Returned to intake receipt",
+      "type": "terminal",
+      "index": 18,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    }
+  ],
+  "edges": [
+    {
+      "id": "email_attachment__clean__extract",
+      "source": "email_attachment",
+      "target": "extract",
+      "branchType": "clean"
+    },
+    {
+      "id": "extract__clean__supplier_bank_check",
+      "source": "extract",
+      "target": "supplier_bank_check",
+      "branchType": "clean"
+    },
+    {
+      "id": "extract__clean__amount_vat_check",
+      "source": "extract",
+      "target": "amount_vat_check",
+      "branchType": "clean"
+    },
+    {
+      "id": "extract__clean__purchase_order_check",
+      "source": "extract",
+      "target": "purchase_order_check",
+      "branchType": "clean"
+    },
+    {
+      "id": "extract__clean__duplicate_check",
+      "source": "extract",
+      "target": "duplicate_check",
+      "branchType": "clean"
+    },
+    {
+      "id": "supplier_bank_check__clean__check_aggregate",
+      "source": "supplier_bank_check",
+      "target": "check_aggregate",
+      "branchType": "clean"
+    },
+    {
+      "id": "amount_vat_check__clean__check_aggregate",
+      "source": "amount_vat_check",
+      "target": "check_aggregate",
+      "branchType": "clean"
+    },
+    {
+      "id": "purchase_order_check__clean__check_aggregate",
+      "source": "purchase_order_check",
+      "target": "check_aggregate",
+      "branchType": "clean"
+    },
+    {
+      "id": "duplicate_check__clean__check_aggregate",
+      "source": "duplicate_check",
+      "target": "check_aggregate",
+      "branchType": "clean"
+    },
+    {
+      "id": "check_aggregate__clean__independent_verifier",
+      "source": "check_aggregate",
+      "target": "independent_verifier",
+      "branchType": "clean"
+    },
+    {
+      "id": "independent_verifier__clean__policy_decision",
+      "source": "independent_verifier",
+      "target": "policy_decision",
+      "branchType": "clean"
+    },
+    {
+      "id": "policy_decision__clean__clean_result",
+      "source": "policy_decision",
+      "target": "clean_result",
+      "branchType": "clean"
+    },
+    {
+      "id": "clean_result__clean__result_verification",
+      "source": "clean_result",
+      "target": "result_verification",
+      "branchType": "clean"
+    },
+    {
+      "id": "result_verification__clean__clean_receipt",
+      "source": "result_verification",
+      "target": "clean_receipt",
+      "branchType": "clean"
+    },
+    {
+      "id": "policy_decision__exception__exception_gate",
+      "source": "policy_decision",
+      "target": "exception_gate",
+      "branchType": "exception"
+    },
+    {
+      "id": "exception_gate__approval__approved_result",
+      "source": "exception_gate",
+      "target": "approved_result",
+      "branchType": "approval"
+    },
+    {
+      "id": "approved_result__clean__approved_verification",
+      "source": "approved_result",
+      "target": "approved_verification",
+      "branchType": "clean"
+    },
+    {
+      "id": "approved_verification__clean__approved_receipt",
+      "source": "approved_verification",
+      "target": "approved_receipt",
+      "branchType": "clean"
+    },
+    {
+      "id": "exception_gate__rejection__rejected_receipt",
+      "source": "exception_gate",
+      "target": "rejected_receipt",
+      "branchType": "rejection"
+    },
+    {
+      "id": "policy_decision__escalation__duplicate_receipt",
+      "source": "policy_decision",
+      "target": "duplicate_receipt",
+      "branchType": "escalation"
+    },
+    {
+      "id": "policy_decision__retry__intake_return_receipt",
+      "source": "policy_decision",
+      "target": "intake_return_receipt",
+      "branchType": "retry"
+    }
+  ],
+  "publicBoundary": {
+    "fixtureOnly": true,
+    "externalWrites": 0,
+    "unresolvedImplementationDecisions": 9,
+    "memoryPromotion": "human_review_required"
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "schema": "vvdex.service-graph/v1",
+  "serviceId": "n8n-automation-rescue",
+  "name": "n8n Automation Rescue",
+  "category": "Engineering",
+  "family": "engineering_reliability",
+  "riskClass": "high",
+  "serviceVersion": "0.1.0",
+  "graphVersion": "1ba95c25bf8a-g2",
+  "definitionHash": "1ba95c25bf8a50d93a6c3d62235733632323287785fc824e3ddb5625f5f87a49",
+  "startNodeId": "step_2",
+  "nodeCount": 11,
+  "edgeCount": 10,
+  "humanGateCount": 1,
+  "nodes": [
+    {
+      "id": "step_2",
+      "label": "Reproduction",
+      "type": "intake",
+      "index": 0,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "step_3",
+      "label": "Diagnosis",
+      "type": "model_reasoning",
+      "index": 1,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "step_5",
+      "label": "The independent check",
+      "type": "deterministic",
+      "index": 2,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "independent_verifier",
+      "label": "Independent verification",
+      "type": "independent_verifier",
+      "index": 3,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "policy_decision",
+      "label": "Policy decision",
+      "type": "policy_decision",
+      "index": 4,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "clean_result",
+      "label": "Prepare clean result",
+      "type": "side_effect_preparation",
+      "index": 5,
+      "concurrencyGroup": null,
+      "sideEffect": "prepared"
+    },
+    {
+      "id": "exception_gate",
+      "label": "Human exception decision",
+      "type": "human_gate",
+      "index": 6,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "approved_result",
+      "label": "Prepare approved exception",
+      "type": "side_effect_preparation",
+      "index": 7,
+      "concurrencyGroup": null,
+      "sideEffect": "authorized"
+    },
+    {
+      "id": "clean_receipt",
+      "label": "Clean evidence receipt",
+      "type": "terminal",
+      "index": 8,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "approved_receipt",
+      "label": "Approved evidence receipt",
+      "type": "terminal",
+      "index": 9,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    },
+    {
+      "id": "rejected_receipt",
+      "label": "Rejected evidence receipt",
+      "type": "terminal",
+      "index": 10,
+      "concurrencyGroup": null,
+      "sideEffect": "none"
+    }
+  ],
+  "edges": [
+    {
+      "id": "step_2__clean__step_3",
+      "source": "step_2",
+      "target": "step_3",
+      "branchType": "clean"
+    },
+    {
+      "id": "step_3__clean__step_5",
+      "source": "step_3",
+      "target": "step_5",
+      "branchType": "clean"
+    },
+    {
+      "id": "step_5__clean__independent_verifier",
+      "source": "step_5",
+      "target": "independent_verifier",
+      "branchType": "clean"
+    },
+    {
+      "id": "independent_verifier__clean__policy_decision",
+      "source": "independent_verifier",
+      "target": "policy_decision",
+      "branchType": "clean"
+    },
+    {
+      "id": "policy_decision__clean__clean_result",
+      "source": "policy_decision",
+      "target": "clean_result",
+      "branchType": "clean"
+    },
+    {
+      "id": "clean_result__clean__clean_receipt",
+      "source": "clean_result",
+      "target": "clean_receipt",
+      "branchType": "clean"
+    },
+    {
+      "id": "policy_decision__exception__exception_gate",
+      "source": "policy_decision",
+      "target": "exception_gate",
+      "branchType": "exception"
+    },
+    {
+      "id": "exception_gate__approval__approved_result",
+      "source": "exception_gate",
+      "target": "approved_result",
+      "branchType": "approval"
+    },
+    {
+      "id": "approved_result__clean__approved_receipt",
+      "source": "approved_result",
+      "target": "approved_receipt",
+      "branchType": "clean"
+    },
+    {
+      "id": "exception_gate__rejection__rejected_receipt",
+      "source": "exception_gate",
+      "target": "rejected_receipt",
+      "branchType": "rejection"
+    }
+  ],
+  "publicBoundary": {
+    "fixtureOnly": true,
+    "externalWrites": 0,
+    "unresolvedImplementationDecisions": 3,
+    "memoryPromotion": "human_review_required"
+  }
+}

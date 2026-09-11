@@ -1,0 +1,57 @@
+id: mcp-integration
+name: "MCP Integration"
+version: 0.1.0
+kind: service
+tier: A
+readiness: "Foundation ready"
+autonomy: approval-gated
+summary: "Exposes one client system to agents through a Model Context Protocol server with a written tool contract — every tool, its scope, its read or write side and its idempotency key — proven by conformance tests and safety probes before any write-capable tool is offered."
+buyer: "Businesses whose ticketing system, CRM or database is about to be connected to an AI assistant, and who have no written statement of what that assistant would then be able to do."
+outcome: "A tool contract with per-tool conformance and safety-probe results, a server built against it with every write-capable tool disabled, and a deployment package the systems owner approves tool by tool."
+channels:
+  - "Operator workspace"
+  - "Client system of record"
+  - "Conformance workspace"
+  - "Handover session"
+core:
+  - "Sara specialist runtime"
+  - "MNEMA customer facts and outcome memory"
+  - "Project Brain policies, approvals and evidence"
+  - "Postgres task, receipt and audit ledger"
+  - "Service Lab evaluation harness"
+policy:
+  ai_disclosure: required
+  tenant_isolation: required
+  evidence_provenance: field-level
+  consequential_actions: approval-gated
+  memory_write: verified-outcome-only
+approvals:
+  - "Enabling any write-capable tool on a deployed server"
+  - "Widening a tool's scope beyond the one stated in the contract"
+  - "Any external communication sent in the customer’s name"
+  - "Any irreversible write, delete, payment or permission change"
+  - "Any action below the configured confidence or policy threshold"
+metrics:
+  - "Tools in the contract with a stated scope and idempotency key"
+  - "Conformance checks passing per tool"
+  - "Safety probes refused as designed"
+  - "Write-capable tools still disabled at handover"
+source_references:
+  - "OpenAI Agents SDK"
+  - "LangGraph"
+  - "PydanticAI"
+  - "Model Context Protocol"
+laws:
+  - "The contract is written before the server: a tool that is not in the contract does not exist on the server."
+  - "Read and write are separate tools with separate scopes, never one tool with a flag."
+  - "Every write-capable tool carries an idempotency key that has been replayed and shown to produce one effect."
+  - "Write-capable tools ship disabled and are enabled one at a time by the systems owner, never as a set."
+  - "A tool whose results carry content written outside the business is marked as such, and a write may not be reachable from it in the same turn without a fresh approval."
+  - "A probe that reached a write holds every write-capable tool, not only the one it came through."
+deliverables:
+  - "A tool contract: every tool, its scope, its read or write side and its idempotency key"
+  - "A built server with every write-capable tool disabled"
+  - "Per-tool conformance results, including the idempotency replays"
+  - "Safety probe results with the probes that were refused and the ones that were not"
+  - "A deployment package for the client's own platform, with the enabling order per tool"
+readiness_honesty: "The protocol and the probe set are real and this estate runs its own tool servers, but nothing in this pack has been built for an external client: no client system has been exposed, no client contract has been written and no server has been deployed anywhere. Every number in the walkthrough is fixture data from a synthetic ticketing system. Foundation ready means the contract shape, the conformance tests and the probes exist and are exercised inside VVDex."

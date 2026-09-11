@@ -1,0 +1,676 @@
+{
+  "schema": "vvdex.service-pack-definition/v1",
+  "packId": "n8n-automation-rescue",
+  "notes": "Authored by hand from this pack's own row in data/services.json. All 16 blocks are authored and none takes the `missing` exemption. The boundary is the content: the whole rescue is reproduced from artifacts the client hands over — the workflow export and the recorded executions — so nothing is read from, and nothing is written to, the client's live instance. There is exactly one human gate, the workflow owner's decision on the import, and the import is performed by that owner rather than by us. The specialist proposes the diff and a different agent re-runs the checks, because the engineer who wrote a patch is the worst person to certify it.",
+
+  "identity": {
+    "missing": [],
+    "name": "n8n Automation Rescue",
+    "category": "Engineering",
+    "targetUsers": "Businesses running an automation they did not build — in practice whoever is answering for the work the workflow is no longer doing, plus the one person allowed to import a change into the instance.",
+    "problem": "A workflow somebody else built fails intermittently, fails silently, or has failed since a change nobody on the team made. Nobody can trigger the failure on demand, every attempted fix is another edit to a live automation, and the usual response — opening the workflow and changing a node until it looks right — is what turned a small defect into an automation nobody trusts.",
+    "outcome": "A named cause with the evidence that excluded the alternatives, and the smallest safe correction prepared as a workflow diff with a regression run plan and a way back, ready for the workflow's owner to import.",
+    "permittedActions": [
+      "Read the workflow export and the recorded executions the client supplied, in a workspace of ours, with every credential stubbed.",
+      "Replay the exported workflow against those recorded executions as many times as it takes to make the failure deterministic.",
+      "Compare one node's configuration against the failure families the diagnosis lane tests.",
+      "Prepare a node-by-node diff, a regression run plan and a written way back, and hand all three to the named owner.",
+      "Append the rescue brief, the failure case, the root cause and the check report to the evidence ledger."
+    ],
+    "prohibitedActions": [
+      "Edit a workflow on a client's live instance, at any point, for any reason.",
+      "Import the prepared diff ourselves, including where the owner has said yes — the owner applies it.",
+      "Bind a client credential to the rescue lane in order to reproduce a failure.",
+      "Copy an execution log wholesale when the reproduction needs a handful of fields from it.",
+      "Name a cause without listing the alternatives that were excluded and the observation that excluded each one.",
+      "Import anything into a client's instance that did not come from their own export."
+    ],
+    "nonDelegableDecisions": [
+      "Whether the prepared diff is imported into the instance at all belongs to the named workflow owner — the person who can both approve the import and undo it — and is never taken by an agent or by VVDex on their behalf.",
+      "Whether an execution log may leave the client's instance is the client's data owner's decision, recorded in the rescue brief with a date before anything is copied."
+    ],
+    "notThis": [
+      "Not a rebuild. Where the honest answer is that the workflow should be rebuilt rather than patched, this pack says so and stops at the diagnosis.",
+      "Not a monitoring service. It ends at a prepared package, not at an automation somebody watches for you.",
+      "Not an audit of every workflow on the instance. One workflow, one named failure."
+    ]
+  },
+
+  "inputs": {
+    "missing": [],
+    "required": [
+      { "name": "Workflow export", "type": "application/json", "why": "The failing workflow exactly as the instance holds it. Every claim in the report points at a node id inside this file." },
+      { "name": "Failing execution set", "type": "application/json", "why": "The recorded executions — failing and successful — the reproduction replays against. The successful ones are as important as the failing ones: the difference between them is the diagnosis." }
+    ],
+    "optional": [
+      { "name": "Credential scope list", "type": "text/markdown", "why": "Connected accounts, what each is allowed to do and when it was last rotated. Scopes only, never secrets: two of the four failure families can be excluded from this list alone." }
+    ],
+    "acceptedTypes": ["application/json", "text/csv", "text/markdown"],
+    "requiredIntegrations": [
+      { "capability": "Workflow platform", "preferred": "Existing n8n", "why": "The client's own instance is where the workflow runs and the only place a repaired version is ever imported" },
+      { "capability": "Workflow export and executions", "preferred": "Client-supplied workflow export", "why": "The failing workflow as JSON together with the failing execution ids" },
+      { "capability": "Run observability", "preferred": "Client tracing", "why": "The client's own tracing, so the failing and the patched replays are read side by side" },
+      { "capability": "Workflow diagnosis", "preferred": "VVDex Workflow Diagnosis", "why": "The workflow is diffed node by node, the failure family is classified, and the reproduction case is frozen as a test" }
+    ]
+  },
+
+  "clarifications": {
+    "missing": [],
+    "items": [
+      {
+        "id": "workflow-export",
+        "question": "Which workflow is failing, and can you export it as JSON together with the ids of the failing executions?",
+        "why": "The export and the executions are the entire evidence base; without them nothing can be replayed.",
+        "required": true,
+        "kind": "schema",
+        "conditions": "Always, before any other work. A rescue that has not received the export has not started.",
+        "allowedAssumption": null
+      },
+      {
+        "id": "failure-shape",
+        "question": "What does the failure look like from the business's side, and how often does it happen?",
+        "why": "The business symptom decides which executions are worth replaying, and the rate is the number the repair has to move.",
+        "required": true,
+        "kind": "other",
+        "conditions": "Always. A symptom with no rate is a complaint; a rate makes the repair provable.",
+        "allowedAssumption": null
+      },
+      {
+        "id": "instance-and-owner",
+        "question": "Which instance does it run on, and who is allowed to import a change into it?",
+        "why": "Everything after the diagnosis is a change to a system we do not own, and this is the person who authorizes it and can put it back.",
+        "required": true,
+        "kind": "owner",
+        "conditions": "Always, and before the diff is written rather than when it is finished.",
+        "allowedAssumption": null
+      },
+      {
+        "id": "credentials-in-scope",
+        "question": "Which credentials does the workflow use, and may we see their scopes without their secrets?",
+        "why": "Credential and authorization failures are the most common cause and the cheapest to exclude.",
+        "required": false,
+        "kind": "permission",
+        "conditions": "Where the scope list is not supplied, the credential family is marked as untested rather than excluded.",
+        "allowedAssumption": "Scopes and rotation dates only, listed from the instance's credential page. No secret is shared and nothing is bound to the rescue lane."
+      },
+      {
+        "id": "log-privacy",
+        "question": "May the execution log leave the instance, and does it carry personal data?",
+        "why": "The execution log is the most sensitive artifact in the engagement and the easiest to copy without thinking.",
+        "required": false,
+        "kind": "policy",
+        "conditions": "Where the client permits a full export, the decision is recorded in the rescue brief with the date and the person who made it.",
+        "allowedAssumption": "The log stays on the instance; only the fields the reproduction needs are extracted and everything else is redacted before anything is copied."
+      }
+    ],
+    "neverAssumeSilently": [
+      "Never assume the export matches the instance. Where the instance has been edited since the export, that is stated and the package is re-cut against a fresh export.",
+      "Never assume an intermittent failure is one cause. The parallel test of the four families exists because the intermittent cases are usually two at once.",
+      "Never assume the owner of the instance is the owner of the workflow; the person who may import a change is named explicitly."
+    ]
+  },
+
+  "workflowSteps": {
+    "missing": [],
+    "steps": [
+      {
+        "id": "step-1",
+        "name": "Intake",
+        "purpose": "Take the workflow export, the failing execution ids and the state the business is left in.",
+        "inputArtifacts": ["Workflow export", "Failing execution set"],
+        "outputArtifacts": ["Rescue brief"],
+        "agentId": "sara-intake",
+        "toolIds": ["client-supplied-workflow-export"],
+        "mode": "human-controlled",
+        "label": "The rescue brief",
+        "doingVerb": "Taking the export, the failing executions and the business impact",
+        "countNouns": ["workflows in scope", "failing executions supplied", "executions the log no longer holds"]
+      },
+      {
+        "id": "step-2",
+        "name": "Reproduce",
+        "purpose": "Replay the exported workflow against its recorded executions until the failure is deterministic.",
+        "inputArtifacts": ["Rescue brief"],
+        "outputArtifacts": ["Deterministic failure case"],
+        "agentId": "specialist-n8n-automation-rescue",
+        "toolIds": ["client-supplied-workflow-export", "vvdex-workflow-diagnosis"],
+        "mode": "automatic",
+        "label": "Reproduction",
+        "doingVerb": "Replaying the export against its recorded executions",
+        "countNouns": ["replays run", "replays that failed", "replays that passed"]
+      },
+      {
+        "id": "step-3",
+        "name": "Diagnose",
+        "purpose": "Test the credential, schema, rate and logic families against the failing executions.",
+        "inputArtifacts": ["Deterministic failure case"],
+        "outputArtifacts": ["Root cause with evidence"],
+        "agentId": "specialist-n8n-automation-rescue",
+        "toolIds": ["client-tracing", "vvdex-workflow-diagnosis"],
+        "mode": "automatic",
+        "label": "Diagnosis",
+        "doingVerb": "Testing the credential, schema, rate and logic families",
+        "countNouns": ["failure families tested", "causes excluded", "causes named"]
+      },
+      {
+        "id": "step-4",
+        "name": "Repair",
+        "purpose": "Prepare the smallest safe correction as a node-by-node workflow diff.",
+        "inputArtifacts": ["Root cause with evidence"],
+        "outputArtifacts": ["Workflow diff"],
+        "agentId": "specialist-n8n-automation-rescue",
+        "toolIds": ["client-supplied-workflow-export"],
+        "mode": "human-controlled",
+        "label": "The diff",
+        "doingVerb": "Preparing the smallest safe correction",
+        "countNouns": ["nodes changed", "connections changed", "nodes deliberately left alone"]
+      },
+      {
+        "id": "step-5",
+        "name": "Check",
+        "purpose": "Re-run the reproduction and the regression set against the patched export, independently of whoever wrote the diff.",
+        "inputArtifacts": ["Workflow diff"],
+        "outputArtifacts": ["Independent check report"],
+        "agentId": "evidence-qa",
+        "toolIds": ["vvdex-workflow-diagnosis", "evidence-ledger"],
+        "mode": "automatic",
+        "label": "The independent check",
+        "doingVerb": "Re-running the reproduction and the regression set against the patched export",
+        "countNouns": ["checks re-run", "checks passing", "checks still failing"],
+        "criteria": [
+          "Whether the frozen reproduction case now passes against the patched export",
+          "Whether every other execution in the regression set still produces the same result it produced before",
+          "Whether a retry of the patched workflow produces one side effect rather than two",
+          "Whether the diff touches any node outside the path the named cause runs through",
+          "Whether the patched export still matches the instance it will be imported into",
+          "Which way back exists if the import makes things worse, and whether it has been written down"
+        ]
+      },
+      {
+        "id": "step-6",
+        "name": "Hand over",
+        "purpose": "Prepare the import package, the regression run plan and the way back for the owner.",
+        "inputArtifacts": ["Independent check report"],
+        "outputArtifacts": ["Prepared import package"],
+        "agentId": "specialist-n8n-automation-rescue",
+        "toolIds": ["approval-inbox"],
+        "mode": "human-controlled",
+        "label": "Handover",
+        "doingVerb": "Preparing the import package and the way back",
+        "countNouns": ["packages prepared", "regression runs planned", "items still waiting on the owner"]
+      }
+    ],
+    "loops": [
+      {
+        "id": "loop-diagnose-repair-check",
+        "why": "A check that fails sends the work back, and where it goes depends on which check failed: a regression that changed is a fault in the diff, and a reproduction case that still fails means the cause was wrong. The cycle closes when the same checks pass against the patched export.",
+        "steps": ["step-3", "step-4", "step-5"]
+      }
+    ]
+  },
+
+  "decisionGates": {
+    "missing": [],
+    "gates": [
+      {
+        "id": "hand-over-decision",
+        "stepId": "step-5",
+        "question": "Has the patched export earned a handover — does the frozen reproduction case pass, does every regression execution produce what it produced before, and is there a written way back?",
+        "evidence": ["Deterministic failure case", "Independent check report", "Workflow diff"],
+        "policy": "In this order. (1) Nothing is handed over while the frozen reproduction case still fails against the patched export: a case that still fails means the cause was wrong, not the patch, and the work returns to diagnosis. (2) Nothing is handed over while any execution in the regression set produces a different result than it produced before the diff; that is a fault in the diff and the work returns to repair. (3) Nothing is handed over while the diff changes a node outside the path the named cause runs through; that change is removed and proposed separately. (4) Nothing is handed over without a written way back the named owner can execute alone. (5) Where (1) to (4) hold, the package is prepared and put to the named owner, whose decision on the import is the only thing that moves it onto the instance.",
+        "outcomes": [
+          "Hand over for the owner's decision",
+          "Back to repair: the regression set changed",
+          "Back to diagnosis: the reproduction case still fails",
+          "Hold: no written way back"
+        ],
+        "scoreAppropriate": false,
+        "whyNoScore": "Each condition is a fact that is either true or false about a named execution, and a single failing regression execution is disqualifying on its own. Averaging four such facts into one number would let three passes hide the one that matters.",
+        "nonCompensable": [
+          "A passing regression set never offsets a reproduction case that still fails.",
+          "A clean diff never offsets the absence of a written way back."
+        ],
+        "nonDelegableDecision": "Condition (5) hands the decision to the named workflow owner: whether the prepared package is imported into their instance is theirs alone, and no agent takes it for them."
+      }
+    ]
+  },
+
+  "humanGates": {
+    "missing": [],
+    "gates": [
+      {
+        "id": "approve-import",
+        "requires": "Importing a prepared workflow diff into the client's own instance",
+        "approver": "The named workflow owner — the person who can both approve the import and undo it without us",
+        "authorizes": "One import of this prepared package into this named instance, with the written way back staged before it starts",
+        "onReject": "Nothing is imported. The diff, the reproduction case and the way back are filed with the diagnosis, and the engagement closes there unless the owner asks for a re-cut against a fresh export.",
+        "consumedOnce": true
+      }
+    ]
+  },
+
+  "branching": {
+    "missing": [],
+    "paths": [
+      {
+        "id": "path-reproduced",
+        "kind": "success",
+        "from": "step-2",
+        "to": "step-3",
+        "when": "The failure reproduces on demand from the export and the recorded executions, with every credential stubbed.",
+        "label": "Reproduced — diagnose"
+      },
+      {
+        "id": "path-not-reproduced",
+        "kind": "needs-information",
+        "from": "step-2",
+        "to": "not-reproduced",
+        "when": "The replays ran and the failure never appeared, so either the executions supplied do not contain it or the export no longer matches the instance.",
+        "label": "Held — the failure did not reproduce"
+      },
+      {
+        "id": "path-more-executions",
+        "kind": "revision",
+        "from": "not-reproduced",
+        "to": "step-1",
+        "when": "The client supplied further failing executions, or a fresh export taken from the instance as it stands today.",
+        "label": "New evidence supplied — re-cut the brief"
+      },
+      {
+        "id": "path-diagnosed",
+        "kind": "success",
+        "from": "step-3",
+        "to": "step-4",
+        "when": "One cause is named and the other three families are excluded, each with the observation that excluded it.",
+        "label": "Cause named — prepare the diff"
+      },
+      {
+        "id": "path-repaired",
+        "kind": "success",
+        "from": "step-4",
+        "to": "step-5",
+        "when": "A node-by-node diff exists with a reason for every change.",
+        "label": "Diff prepared — independent check"
+      },
+      {
+        "id": "path-check-failed",
+        "kind": "failure",
+        "from": "step-5",
+        "to": "step-4",
+        "when": "A regression execution produced a different result than it produced before the diff.",
+        "label": "Regression changed — back to repair"
+      },
+      {
+        "id": "path-cause-unproven",
+        "kind": "failure",
+        "from": "step-5",
+        "to": "step-3",
+        "when": "The frozen reproduction case still fails against the patched export, so the cause was wrong rather than the patch.",
+        "label": "Reproduction still fails — back to diagnosis"
+      },
+      {
+        "id": "path-checked",
+        "kind": "success",
+        "from": "step-5",
+        "to": "step-6",
+        "when": "Every condition of the handover policy holds and a written way back exists.",
+        "label": "Checks passed — prepare the package"
+      },
+      {
+        "id": "path-awaiting-owner",
+        "kind": "needs-information",
+        "from": "step-6",
+        "to": "approve-import",
+        "when": "The package is prepared and the named owner has not yet decided on the import.",
+        "label": "Waiting on the named owner"
+      },
+      {
+        "id": "path-owner-approves",
+        "kind": "success",
+        "from": "approve-import",
+        "to": "import-applied",
+        "when": "The named owner approved the import and applied the package on their own instance, with the way back staged.",
+        "label": "Approved — imported by the owner"
+      },
+      {
+        "id": "path-owner-declines",
+        "kind": "decline",
+        "from": "approve-import",
+        "to": "diff-declined-and-filed",
+        "when": "The named owner declined the prepared import and said the workflow will be rebuilt rather than patched.",
+        "label": "Declined — the prepared diff is filed unapplied"
+      }
+    ],
+    "terminals": [
+      {
+        "id": "not-reproduced",
+        "kind": "needs-information",
+        "label": "Held — the failure did not reproduce",
+        "reason": "Nothing is diagnosed from replays that all passed. The run waits on further failing executions or a fresh export.",
+        "resumesVia": "path-more-executions",
+        "sealed": false
+      },
+      {
+        "id": "import-applied",
+        "kind": "success",
+        "label": "Imported by the owner and receipted",
+        "reason": "The owner approved and applied the package. The rescue brief, the failure case, the root cause, the diff and the check report are sealed into one evidence bundle with the import receipt the owner returned.",
+        "sealed": true,
+        "evidence": ["Rescue brief", "Deterministic failure case", "Root cause with evidence", "Workflow diff", "Independent check report", "Prepared import package"]
+      },
+      {
+        "id": "diff-declined-and-filed",
+        "kind": "archive",
+        "label": "Archived — prepared diff filed unapplied",
+        "configured": true,
+        "reason": "The named owner declined the prepared import and chose to have the workflow rebuilt rather than patched, so the prepared diff is filed unapplied beside the diagnosis and nothing further happens on this engagement.",
+        "sealed": true
+      }
+    ],
+    "archivePath": "path-owner-declines",
+    "archiveNote": "The only way into the archive is the owner declining the import. A rescue that is merely waiting — on executions, on a fresh export, on the owner — is held at a terminal that names its way back, never filed."
+  },
+
+  "actions": {
+    "missing": [],
+    "actions": [
+      {
+        "id": "action-read-supplied-artifacts",
+        "scope": "internal",
+        "op": "rescue-lane.read-supplied-artifacts",
+        "description": "Read the workflow export and the recorded executions the client handed over, inside the rescue lane.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "rescue-lane:read",
+        "sideEffects": "None outside the rescue lane. The artifacts are copies the client supplied; the instance they came from is not contacted."
+      },
+      {
+        "id": "action-replay-export",
+        "scope": "internal",
+        "op": "rescue-lane.replay",
+        "description": "Replay the exported workflow against the recorded executions with every credential stubbed and every write adapter disabled.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "rescue-lane:execute",
+        "sideEffects": "None. No credential is bound, so a node that would call a client system returns the stub rather than reaching anything."
+      },
+      {
+        "id": "action-prepare-import-package",
+        "scope": "internal",
+        "op": "rescue-lane.prepare-package",
+        "description": "Prepare the import package: the patched export, the node-by-node diff, the regression run plan and the written way back.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "rescue-lane:write",
+        "sideEffects": "A file handed to the owner. Preparing it changes nothing anywhere until somebody imports it."
+      },
+      {
+        "id": "action-import-prepared-package",
+        "scope": "external",
+        "op": "client-instance.import",
+        "description": "Import the prepared package into the client's own instance. This is the one act in the engagement that changes a running system, and it is performed by the named workflow owner under their own approval — never by us, including where the owner has already said yes.",
+        "reversible": true,
+        "consequential": true,
+        "requiresGateId": "approve-import",
+        "permission": "client-instance:import",
+        "performedBy": "The named workflow owner, on their own instance, with their own credentials",
+        "sideEffects": "Changes what every subsequent run of that workflow does. Reversible by re-importing the version the way back names, which is why that version is staged before the import rather than looked for afterwards."
+      },
+      {
+        "id": "action-append-receipt",
+        "scope": "internal",
+        "op": "evidence-ledger.append",
+        "description": "Append the rescue brief, the failure case, the root cause, the diff and the check report to the evidence ledger.",
+        "reversible": false,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "evidence-ledger:append",
+        "sideEffects": "Append-only inside VVDex. Irreversible by design and it leaves no external system."
+      }
+    ]
+  },
+
+  "artifacts": {
+    "missing": [],
+    "artifacts": [
+      { "id": "art-export", "name": "Workflow export", "type": "json", "fields": ["workflow_id", "nodes", "connections", "exported_at"], "owner": "client", "versioning": "immutable", "evidence": ["Client handover record with the export's own timestamp"] },
+      { "id": "art-executions", "name": "Failing execution set", "type": "json", "fields": ["execution_id", "status", "started_at", "node_results"], "owner": "client", "versioning": "immutable", "evidence": ["Client handover record naming which fields were redacted"] },
+      { "id": "art-brief", "name": "Rescue brief", "type": "document", "fields": ["workflow", "symptom", "observed_rate", "instance", "named_owner", "data_decision"], "owner": "run", "versioning": "versioned", "evidence": ["Intake record with the date of the execution-log decision"] },
+      { "id": "art-failure-case", "name": "Deterministic failure case", "type": "test-fixture", "fields": ["execution_id", "input", "expected_failure", "replays", "failures"], "owner": "run", "versioning": "immutable", "evidence": ["Replay receipt with the failing and passing counts"] },
+      { "id": "art-root-cause", "name": "Root cause with evidence", "type": "document", "fields": ["named_cause", "node_id", "excluded_families", "observation_per_exclusion"], "owner": "run", "versioning": "versioned", "evidence": ["Trace references for each exclusion"] },
+      { "id": "art-diff", "name": "Workflow diff", "type": "diff", "fields": ["node_id", "before", "after", "reason"], "owner": "run", "versioning": "versioned", "evidence": ["The patched export the diff was computed against"] },
+      { "id": "art-check", "name": "Independent check report", "type": "report", "fields": ["reproduction_result", "regression_results", "retry_result", "scope_result", "way_back"], "owner": "run", "versioning": "versioned", "evidence": ["Check receipts written by the auditing agent, not by the author of the diff"] },
+      { "id": "art-package", "name": "Prepared import package", "type": "bundle", "fields": ["patched_export", "diff", "regression_run_plan", "way_back", "named_owner"], "owner": "client", "versioning": "versioned", "evidence": ["Handover record; an import receipt only where the owner returns one"] }
+    ]
+  },
+
+  "metrics": {
+    "missing": [],
+    "metrics": [
+      { "id": "m-reproduced", "name": "Failing executions reproduced deterministically", "unit": "executions", "calculation": "Count of supplied failing executions whose failure appeared in every replay of that execution.", "threshold": 1, "policy": "Below one, there is no case to diagnose and the run is held at the reproduction terminal rather than proceeding on a theory.", "blocking": true },
+      { "id": "m-excluded", "name": "Candidate causes excluded with a stated observation", "unit": "failure families", "calculation": "Count of the four failure families whose exclusion carries a named observation from a trace or the scope list.", "threshold": 3, "policy": "Four families are tested; naming one cause requires the other three to be excluded with evidence, so anything below three leaves the diagnosis unproven.", "blocking": true },
+      { "id": "m-nodes-changed", "name": "Nodes changed in the prepared diff", "unit": "nodes", "calculation": "Count of nodes whose configuration differs between the supplied export and the patched export.", "threshold": null, "policy": null, "blocking": false },
+      { "id": "m-regression", "name": "Regression set passing against the patched export", "unit": "executions", "calculation": "Count of regression executions producing the same result against the patched export as they produced against the original.", "threshold": null, "policy": null, "blocking": true }
+    ]
+  },
+
+  "receipts": {
+    "missing": [],
+    "items": [
+      {
+        "id": "receipt-intake",
+        "stepId": "step-1",
+        "inputs": ["Workflow export", "Failing execution set"],
+        "work": "Recorded the workflow, the symptom and its rate, the instance, the named owner, and which fields of the execution log were copied and which were redacted.",
+        "tools": ["client-supplied-workflow-export"],
+        "outputs": ["Rescue brief"],
+        "decisions": [],
+        "unknowns": ["Whether the instance has been edited since the export was taken"],
+        "errors": [],
+        "fingerprint": { "kind": "export-digest", "computedFrom": "the bytes of the workflow export the client supplied", "decorative": false },
+        "fingerprintNote": "Every later claim names a node id inside this export, so the export's own digest is what makes those claims checkable against the same file the client sent."
+      },
+      {
+        "id": "receipt-reproduce",
+        "stepId": "step-2",
+        "inputs": ["Rescue brief"],
+        "work": "Replayed the export against the recorded executions with every credential stubbed until the failure was deterministic, and froze the resulting case as a regression test.",
+        "tools": ["client-supplied-workflow-export", "vvdex-workflow-diagnosis"],
+        "outputs": ["Deterministic failure case"],
+        "decisions": [],
+        "unknowns": ["Replays that passed, where the pass is unexplained rather than understood"],
+        "errors": [],
+        "fingerprint": { "kind": "failure-case-digest", "computedFrom": "the frozen reproduction case: the execution input, the expected failure and the replay counts", "decorative": false },
+        "fingerprintNote": "The check step re-runs this exact case; the digest is what proves it re-ran the same one rather than a case edited to pass."
+      },
+      {
+        "id": "receipt-diagnose",
+        "stepId": "step-3",
+        "inputs": ["Deterministic failure case"],
+        "work": "Tested the credential, schema, rate and logic families against the failing and the passing executions, named one cause and excluded the others with the observation behind each exclusion.",
+        "tools": ["client-tracing", "vvdex-workflow-diagnosis"],
+        "outputs": ["Root cause with evidence"],
+        "decisions": [],
+        "unknowns": ["Whether the upstream change that produced the drift was announced anywhere; it is evidenced from the executions and marked as suspected on the provider's side"],
+        "errors": [],
+        "fingerprint": null,
+        "fingerprintNote": "A diagnosis is prose and references, not an artifact with an identity worth hashing; what is hashed is the case it was made against and the diff it produced."
+      },
+      {
+        "id": "receipt-check",
+        "stepId": "step-5",
+        "inputs": ["Workflow diff"],
+        "work": "Re-ran the frozen reproduction case and the regression set against the patched export, replayed a retry to count side effects, and checked the diff for nodes outside the named cause path.",
+        "tools": ["vvdex-workflow-diagnosis", "evidence-ledger"],
+        "outputs": ["Independent check report"],
+        "decisions": ["hand-over-decision"],
+        "unknowns": ["Whether the instance still matches the export the diff was computed against, which only a fresh export can settle"],
+        "errors": [],
+        "fingerprint": { "kind": "patched-export-digest", "computedFrom": "the bytes of the patched export the checks were run against", "decorative": false },
+        "fingerprintNote": "The package the owner imports carries this digest, so the file they import is provably the file the checks passed on."
+      }
+    ]
+  },
+
+  "agents": {
+    "missing": [],
+    "lead": ["specialist-n8n-automation-rescue"],
+    "active": ["sara-intake", "evidence-qa"],
+    "conditional": ["connector-steward"],
+    "followOn": ["project-brain"],
+    "participation": [
+      { "id": "specialist-n8n-automation-rescue", "part": "lead", "stepIds": ["step-2", "step-3", "step-4", "step-6"], "why": "Runs the reproduction, names the cause, writes the diff and prepares the package the owner is asked to import." },
+      { "id": "sara-intake", "part": "active", "stepIds": ["step-1"], "why": "Takes the export, the executions and the business symptom, and records which fields of the log were copied and which were redacted." },
+      { "id": "evidence-qa", "part": "active", "stepIds": ["step-5"], "why": "Re-runs the reproduction and the regression set against the patched export, independently of whoever wrote the diff." },
+      { "id": "connector-steward", "part": "conditional", "stepIds": [], "why": "Appears only where a client asks for a live read of their instance instead of supplying an export, to scope and bound that read. In the default engagement nothing is connected and it does not participate." },
+      { "id": "project-brain", "part": "follow-on", "stepIds": [], "why": "Holds the refusals this pack is bound by — no live edit, no import by us — and is consulted after a handover when a client asks for standing work on the same instance." }
+    ]
+  },
+
+  "tools": {
+    "missing": [],
+    "required": ["client-supplied-workflow-export", "existing-n8n", "client-tracing", "vvdex-workflow-diagnosis"],
+    "recommended": [],
+    "optional": [],
+    "conditional": [],
+    "prohibited": [],
+    "available": ["strategy-planner", "service-catalogue", "client-brief-builder", "project-brain-policy", "mnema-memory", "approval-inbox", "evidence-ledger"],
+    "connected": [],
+    "connectedNote": "Nothing is connected in the public walkthrough, and in a real engagement the default is that nothing is connected at all: the client exports the workflow and the executions and hands them over. The instance is named as the destination of the prepared package, not as a system we hold a credential for.",
+    "usedInSample": [],
+    "usedInSampleNote": "No tool is used in the public sample. No instance is read, no trace is fetched and nothing is imported — the sample is a recorded fixture over a synthetic workflow.",
+    "depictedInSample": ["client-supplied-workflow-export", "existing-n8n", "client-tracing", "vvdex-workflow-diagnosis"],
+    "depictedInSampleNote": "These are the tools a real rescue would call at the steps the sample walks through. The sample depicts where each one sits; it calls none of them, and in particular no client instance was contacted in either direction."
+  },
+
+  "publicOutput": {
+    "missing": [],
+    "desk": "A named cause with the evidence that excluded the alternatives, and the smallest safe correction prepared as a workflow diff with a regression run plan and a way back.",
+    "cards": [
+      { "artifactId": "art-failure-case", "selected": true, "why": "Proof the failure could be triggered on demand, and in which lane — the difference between a repair and a hopeful edit." },
+      { "artifactId": "art-root-cause", "selected": true, "why": "The named cause with the three families that were excluded and the observation behind each exclusion, so the client sees what was ruled out rather than only what was blamed." },
+      { "artifactId": "art-diff", "selected": true, "why": "The change itself, node by node with a reason each, so the owner can refuse one change without refusing the repair." },
+      { "artifactId": "art-check", "selected": true, "why": "The result of re-running the reproduction and the regression set, produced by somebody other than the author of the diff." }
+    ],
+    "exampleStructure": "One rescue brief per engagement with a dated data decision; one frozen failure case per reproduction; one root cause with one named cause and its exclusions; one diff with a reason per changed node; one check report per revision of the diff; one prepared package per handover.",
+    "limitations": [
+      "The rescue covers the named failing workflow. Other defects found on the way are reported as separate findings rather than fixed quietly.",
+      "Everything is reproduced from the export and the recorded executions. Where the instance has been edited since the export, the package has to be re-cut against a fresh one.",
+      "An upstream provider's change can be evidenced from the executions but rarely confirmed by the provider, so those causes stay marked as suspected.",
+      "The import is the owner's act. Where they never apply the package, the engagement's evidence ends at the handover and says so.",
+      "This pack has zero external clients. The reproduction lane and the evidence ledger are real and exercised inside VVDex; no client workflow has been rescued."
+    ],
+    "approvalsStillRequired": [
+      "Importing a prepared workflow diff into the client's own instance",
+      "Reading an execution log that carries the client's customer data",
+      "Any external communication sent in the customer’s name",
+      "Any irreversible write, delete, payment or permission change",
+      "Any action below the configured confidence or policy threshold"
+    ]
+  },
+
+  "simulationFixture": {
+    "missing": [],
+    "sampleInput": {
+      "brief": "A synthetic invoice workflow has been writing accounting rows with an empty amount since about nine days ago, and a retry once produced two rows for the same invoice. Nobody on the team deployed anything that week.",
+      "syntheticWorkflow": {
+        "note": "Synthetic fixture. This workflow was written for this walkthrough; it is not a client's workflow and no instance holds it.",
+        "name": "Invoice mail to accounting row",
+        "nodes": [
+          { "id": "n1", "type": "webhook", "name": "Invoice mail received" },
+          { "id": "n2", "type": "http", "name": "Fetch invoice from supplier portal" },
+          { "id": "n3", "type": "set", "name": "Extract fields", "config": "amount = {{ $json.invoice.total }}" },
+          { "id": "n4", "type": "http", "name": "Create accounting row", "config": "no idempotency key" }
+        ],
+        "connections": "n1 to n2 to n3 to n4"
+      },
+      "failingExecutions": ["e-2261", "e-2274", "e-2288", "e-2301"],
+      "successfulExecutions": ["e-2119", "e-2137"],
+      "symptom": "Accounting rows created with an empty amount, and one duplicate row after a retry",
+      "observedRate": "9 of the last 200 runs over 14 days, all after the same date",
+      "namedOwner": "the operations lead who administers the instance and can import a change into it",
+      "dataDecision": "Only the response body and the node result of the four failing executions were extracted; every customer field was redacted before anything was copied",
+      "note": "Sample simulation. No external system was contacted."
+    },
+    "sampleOutputs": [
+      "Rescue brief naming the workflow, the symptom, the rate, the instance, the named owner and the redaction decision",
+      "Deterministic failure case: 57 of 60 replays reproduced the empty amount, frozen as a regression test",
+      "Root cause with evidence: the supplier portal moved the invoice body one level down, so the Extract fields node read an undefined value and wrote it through — with the credential, rate and logic families excluded and the observation behind each exclusion",
+      "Workflow diff: two nodes changed — Extract fields reads the new shape and fails loudly when neither shape is present, Create accounting row gains an idempotency key derived from the invoice number",
+      "Independent check report: the frozen case passes, all 6 regression executions unchanged, a retry produced one row rather than two, and no node outside the cause path was touched",
+      "Prepared import package with a regression run plan and a written way back naming the version to re-import",
+      "An import that did not happen, because the sample stops at the owner's gate"
+    ],
+    "counters": [
+      { "label": "Workflows in scope", "n": 1, "unit": "workflows", "stepId": "step-1" },
+      { "label": "Executions requested", "n": 7, "unit": "executions", "stepId": "step-1" },
+      { "label": "Failing executions supplied", "n": 4, "unit": "executions", "stepId": "step-1" },
+      { "label": "Successful executions supplied", "n": 2, "unit": "executions", "stepId": "step-1" },
+      { "label": "Executions the log no longer holds", "n": 1, "unit": "executions", "stepId": "step-1" },
+      { "label": "Replays run", "n": 60, "unit": "replays", "stepId": "step-2" },
+      { "label": "Replays that failed", "n": 57, "unit": "replays", "stepId": "step-2" },
+      { "label": "Replays that passed", "n": 3, "unit": "replays", "stepId": "step-2" },
+      { "label": "Client credentials bound to the rescue lane", "n": 0, "unit": "credentials", "stepId": "step-2" },
+      { "label": "Failure families tested", "n": 4, "unit": "families", "stepId": "step-3" },
+      { "label": "Causes excluded", "n": 3, "unit": "families", "stepId": "step-3" },
+      { "label": "Causes named", "n": 1, "unit": "families", "stepId": "step-3" },
+      { "label": "Nodes in the export", "n": 4, "unit": "nodes", "stepId": "step-4" },
+      { "label": "Nodes changed", "n": 2, "unit": "nodes", "stepId": "step-4" },
+      { "label": "Connections changed", "n": 0, "unit": "connections", "stepId": "step-4" },
+      { "label": "Nodes deliberately left alone", "n": 2, "unit": "nodes", "stepId": "step-4" },
+      { "label": "Checks re-run", "n": 9, "unit": "checks", "stepId": "step-5" },
+      { "label": "Checks passing", "n": 9, "unit": "checks", "stepId": "step-5" },
+      { "label": "Checks still failing", "n": 0, "unit": "checks", "stepId": "step-5" },
+      { "label": "Regression executions replayed", "n": 6, "unit": "executions", "stepId": "step-5" },
+      { "label": "Regression executions unchanged", "n": 6, "unit": "executions", "stepId": "step-5" },
+      { "label": "Packages prepared", "n": 1, "unit": "packages", "stepId": "step-6" },
+      { "label": "Regression runs planned", "n": 1, "unit": "runs", "stepId": "step-6" },
+      { "label": "Items still waiting on the owner", "n": 1, "unit": "decisions", "stepId": "step-6" },
+      { "label": "Imports performed by VVDex", "n": 0, "unit": "imports", "stepId": "step-6" }
+    ],
+    "countersNote": "Fixture data for one worked example over a synthetic workflow, arithmetically closed: 7 executions requested and 1 no longer retained leaves the 6 supplied, which are the 4 failing and the 2 successful; 60 replays split 57 failing and 3 passing, which is what makes the case deterministic enough to freeze and honest enough to call intermittent; 4 families tested with 3 excluded leaves the 1 that was named; 4 nodes with 2 changed leaves the 2 left alone; the 6 regression executions replayed are the same 6 executions supplied, and all 6 came back unchanged. Nothing was imported, no instance was contacted and no credential was bound.",
+    "branchResult": {
+      "gateId": "hand-over-decision",
+      "outcome": "Hand over for the owner's decision",
+      "pathId": "path-checked",
+      "decidedBy": "Conditions (1) to (4) of the handover policy all hold: the frozen reproduction case passes against the patched export, all 6 regression executions produce what they produced before, the diff touches only the two nodes on the named cause path, and the way back — re-import the export as supplied, which the package carries verbatim — is written down for the owner to execute alone.",
+      "notDecidedBy": "Nothing was decided by the retry result on its own, and nothing by the fact that the patch looks small. A retry producing one row is condition (1)'s evidence rather than a reason of its own, and a two-node diff that left a regression execution changed would have gone back to repair under condition (2).",
+      "continues": ["path-checked", "path-awaiting-owner"],
+      "endsAt": "approve-import",
+      "endsAtNote": "The sample stops at the gate. The package is prepared and the named owner has not decided; nothing has been imported, and in a real engagement the import is performed by that owner on their own instance rather than by us."
+    },
+    "receipts": [
+      {
+        "stepId": "step-2",
+        "summary": "Replayed the synthetic export against 6 recorded executions with every credential stubbed: 57 of 60 replays produced the empty amount. No external call was attempted and no credential was bound.",
+        "unknowns": ["The 3 replays that passed took the branch where the supplier portal returned the older response shape; recorded as observed rather than explained"]
+      },
+      {
+        "stepId": "step-3",
+        "summary": "Named cause: the supplier portal moved the invoice body one level down, so the Extract fields node read an undefined value and the create node wrote it through as an empty amount. Three families excluded — credentials (scopes unchanged, last rotated two months before the first failure), rate and timeout (no throttling or timeout in any of the 60 replays), logic (the same branch evaluated identically on the passing executions).",
+        "unknowns": ["The supplier portal publishes no changelog for the response change; it is evidenced from the executions and marked as suspected on their side"]
+      },
+      {
+        "stepId": "step-5",
+        "summary": "Frozen reproduction case passes against the patched export. All 6 regression executions unchanged. A replayed retry produced one accounting row rather than two. The diff touches 2 of 4 nodes, both on the named cause path.",
+        "unknowns": ["Whether the instance still matches the export the diff was computed against; only a fresh export taken on the day of the import can settle that"]
+      }
+    ],
+    "honesty": "Sample simulation. No external system was contacted.",
+    "fingerprint": null,
+    "fingerprintNote": "The sample shows no fingerprint. In a real rescue two identities are genuinely computed and genuinely used — the export digest every claim is checked against, and the patched-export digest the owner's import is matched to — but here the workflow is synthetic and a hash over fixture data would be decoration presented as evidence."
+  },
+
+  "readinessState": {
+    "missing": [],
+    "stage": "simulation",
+    "publicLabel": "Simulation ready",
+    "simulationVisible": true,
+    "publicNotice": "Sample simulation. No external system was contacted.",
+    "catalogueReadiness": "Foundation ready",
+    "whyNotImplementation": "The reproduction lane, the regression freeze and the evidence ledger are real and are exercised against VVDex's own workflows on an n8n instance this estate operates. What has never happened is an external rescue: no client export has been received, no client execution log has been opened, no prepared diff has been handed to a client's workflow owner and nothing has been imported into anybody else's instance. The pack can be walked through and simulated honestly on synthetic material; it cannot claim an implementation, and the numbers in the walkthrough are fixture data rather than a delivery record."
+  }
+}

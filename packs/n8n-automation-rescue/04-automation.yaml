@@ -1,0 +1,57 @@
+service: n8n-automation-rescue
+triggers:
+  - "New rescue intake"
+  - "Failing or partially failing execution"
+  - "Automation that changed hands with no owner"
+  - "Workflow broken since an upstream change nobody deployed"
+workflow:
+  - step: 1
+    name: "Intake"
+    action: "Take the workflow export, the failing execution ids and the state the business is left in"
+    output: "Rescue brief"
+  - step: 2
+    name: "Reproduce"
+    action: "Replay the exported workflow against its recorded executions until the failure is deterministic"
+    output: "Deterministic failure case"
+  - step: 3
+    name: "Diagnose"
+    action: "Test the credential, schema, rate and logic families against the failing executions"
+    output: "Root cause with evidence"
+  - step: 4
+    name: "Repair"
+    action: "Prepare the smallest safe correction as a node-by-node workflow diff"
+    output: "Workflow diff"
+  - step: 5
+    name: "Check"
+    action: "Re-run the reproduction and the regression set against the patched export, independently of whoever wrote the diff"
+    output: "Independent check report"
+  - step: 6
+    name: "Hand over"
+    action: "Prepare the import package, the regression run plan and the way back for the owner"
+    output: "Prepared import package"
+runtime:
+  task_ledger: postgres
+  retries: exponential-with-cap
+  idempotency: required-for-writes
+  resume: from-last-verified-checkpoint
+  timeout_behavior: stop-and-escalate
+  observability: trace-every-model-and-tool-call
+exception_queues:
+  - missing-data
+  - low-confidence
+  - policy-blocked
+  - external-system-failure
+  - human-review
+  - execution-log-no-longer-retained
+  - failure-not-reproducible-from-the-export
+  - instance-drifted-from-the-export
+  - owner-not-identified
+completion_contract:
+  - verify_external_state
+  - attach_source_and_action_receipts
+  - record_cost_and_latency
+  - request_or_import_real_outcome
+  - update_memory_only_from_verified_outcome
+  - attach_the_execution_ids_every_claim_was_read_from
+  - state_which_fields_of_the_execution_log_were_copied_and_which_were_redacted
+  - record_that_the_prepared_package_was_handed_over_and_not_applied

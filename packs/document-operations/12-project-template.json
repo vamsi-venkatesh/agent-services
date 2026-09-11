@@ -1,0 +1,104 @@
+{
+  "id": "document-operations-project-base",
+  "name": "Document Operations Agent project base",
+  "serviceId": "document-operations",
+  "version": "0.1.0",
+  "status": "ready-to-adapt",
+  "agentIds": [
+    "vvdex-strategy",
+    "vvdex-orchestrator",
+    "sara-intake",
+    "specialist-document-operations",
+    "connector-steward",
+    "project-brain",
+    "evidence-qa"
+  ],
+  "toolIds": [
+    "unboundpdf-docling",
+    "paddleocr-or-tesseract",
+    "s3-compatible-encrypted-storage",
+    "existing-erp-crm-dms"
+  ],
+  "edges": [
+    [
+      "sara-intake",
+      "vvdex-strategy"
+    ],
+    [
+      "vvdex-strategy",
+      "vvdex-orchestrator"
+    ],
+    [
+      "vvdex-orchestrator",
+      "specialist-document-operations"
+    ],
+    [
+      "specialist-document-operations",
+      "connector-steward"
+    ],
+    [
+      "connector-steward",
+      "project-brain"
+    ],
+    [
+      "project-brain",
+      "evidence-qa"
+    ],
+    [
+      "evidence-qa",
+      "vvdex-orchestrator"
+    ]
+  ],
+  "requiredClientInputs": [
+    {
+      "id": "document-types",
+      "question": "Which document types and languages are in scope?",
+      "recommendation": "Begin with the types that carry most of the volume and have a stable layout — supplier invoices, credit notes, purchase orders, delivery notes and remittance advices — in the languages the business genuinely receives, which for a German back office usually means German and English with occasional French or Dutch suppliers. Handwriting, photographs of screens and scans below roughly 200 dpi go to the exception queue rather than being guessed at.",
+      "whyAsking": "Scope decides which layouts the extraction is tuned and measured against; an unlisted type silently becomes an unmeasured one.",
+      "blocking": false,
+      "kind": "schema",
+      "default": "Supplier invoices, credit notes, purchase orders and delivery notes, in the languages the business already receives today."
+    },
+    {
+      "id": "required-fields",
+      "question": "Which fields are required and how are they validated?",
+      "recommendation": "Required means the destination system rejects the record without it: counterparty matched to a real master record, document number, document date, currency, net, tax and gross totals, and line items wherever the downstream process consumes them. Each one validates against something outside the document — the supplier against the master data, the totals against their own arithmetic and against the purchase order, the date against the open accounting period, the tax rate against the rate valid on that date. A field read with high confidence and no external check is still unvalidated.",
+      "whyAsking": "This is the schema the whole pipeline is measured on: field-level precision means nothing until the required set and its checks are fixed.",
+      "blocking": true,
+      "kind": "schema"
+    },
+    {
+      "id": "storage-retention",
+      "question": "Where must originals and extracted records be stored?",
+      "recommendation": "The original is kept unmodified in encrypted storage inside the agreed data region, with its checksum, sender and receipt timestamp, and it is never overwritten by a corrected version — corrections become new derived artifacts pointing back to it. Extracted records live in the destination business system, with the link to the original held on both sides so any figure can be traced to the page it came from. The retention period is the tax or contractual one the business is already bound by, and it is named before the first document is ingested.",
+      "whyAsking": "Documents are the evidence; where they live and how long they stay decides both the audit answer and the data-protection exposure.",
+      "blocking": true,
+      "kind": "policy"
+    },
+    {
+      "id": "confidence-threshold",
+      "question": "What confidence threshold routes to a human?",
+      "recommendation": "Set it per field rather than per document, and derive it from measurement instead of a default: for each field, the threshold is the level above which a sample of at least a few hundred real documents showed no errors. Totals, tax figures and bank details start fully reviewed whatever the confidence says. Route to a human whenever any required field falls below its own threshold, the totals fail to reconcile, the counterparty is new, or the document looks like a duplicate.",
+      "whyAsking": "The threshold is the trade between straight-through rate and error rate, and it is the single number that decides how much review work the client keeps.",
+      "blocking": false,
+      "kind": "policy",
+      "default": "Any required field below 0.95 confidence goes to review, and bank, tax and total fields are reviewed regardless of confidence."
+    },
+    {
+      "id": "reversible-writes",
+      "question": "Which downstream writes are reversible?",
+      "recommendation": "Reversible: creating a draft record, attaching the document, adding a comment, filling fields on an unposted document. Not reversible in practice: posting to a ledger, releasing a payment, issuing a credit note, sending a confirmation to a supplier, closing a period. Everything in the second list is prepared and gated. Every write is keyed by the document checksum, so a retry after a timeout updates the same record instead of creating a second one.",
+      "whyAsking": "Retries and timeouts are normal; whether they are harmless depends entirely on which writes can be undone and which need a gate.",
+      "blocking": true,
+      "kind": "permission"
+    }
+  ],
+  "completionEvidence": [
+    "Immutable source record",
+    "Structured extraction",
+    "Document class",
+    "Validation report",
+    "Approval decision",
+    "Action receipt"
+  ]
+}

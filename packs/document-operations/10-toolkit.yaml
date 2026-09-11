@@ -1,0 +1,46 @@
+service: document-operations
+agent: specialist-document-operations
+selection_policy:
+  customer_system_first: true
+  typed_connector_before_browser: true
+  least_privilege_credentials: true
+  verify_external_writes: true
+tools:
+  - id: unboundpdf-docling
+    name: "UnboundPDF + Docling"
+    category: documents
+    permission: read-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "Common document model"
+    alternatives:
+      - "Unstructured"
+  - id: paddleocr-or-tesseract
+    name: "PaddleOCR or Tesseract"
+    category: documents
+    permission: read-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "Scans and multilingual text"
+    alternatives:
+      - "Cloud OCR where allowed"
+  - id: s3-compatible-encrypted-storage
+    name: "S3-compatible encrypted storage"
+    category: documents
+    permission: read-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "Original and derived artifacts"
+    alternatives:
+      - "Client DMS"
+      - "SharePoint"
+  - id: existing-erp-crm-dms
+    name: "Existing ERP/CRM/DMS"
+    category: documents
+    permission: approval-gated-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "Destination of validated record"
+    alternatives:
+      - "ERPNext"
+      - "Paperless-ngx"

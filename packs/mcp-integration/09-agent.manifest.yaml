@@ -1,0 +1,56 @@
+id: specialist-mcp-integration
+name: "MCP Integration"
+version: 0.1.0
+kind: specialist
+service: mcp-integration
+category: "Engineering"
+readiness: "Foundation ready"
+autonomy: approval-gated
+mission: "A tool contract with per-tool conformance and safety-probe results, a server built against it with every write-capable tool disabled, and a deployment package the systems owner approves tool by tool."
+runtime:
+  preferred: "OpenAI Agents SDK"
+  alternatives:
+    - "LangGraph"
+    - "PydanticAI"
+    - "CrewAI"
+  state: durable-run-ledger
+skills:
+  - "Contract: Write the tool contract: every tool, its scope, its read or write side and its idempotency key"
+  - "Build: Build the server against the contract with every write-capable tool disabled"
+  - "Conform: Run the conformance tests per tool: schema, error shape, pagination and idempotency replay"
+  - "Probe: Run the safety probes: injection through tool results, scope escalation and cross-tenant reach"
+  - "Check: Re-run the contract against the built server independently of whoever built it"
+  - "Hand over: Prepare the deployment package with every write-capable tool still disabled"
+tools:
+  - "client-systems-of-record"
+  - "client-hosted-mcp-server"
+  - "vvdex-mcp-conformance"
+  - "client-tracing"
+inputs:
+  - "client objective"
+  - "verified customer facts"
+  - "system permissions"
+  - {"id":"system-and-owner","question":"Which system is being exposed, and who owns what happens inside it?","recommendation":"One system per server and one named owner for it — the person who answers for the records it holds and who can revoke the server's credential without asking anybody. A server that exposes three systems is three contracts in one file and cannot be approved tool by tool. Where the system is shared across departments, the owner is whoever is accountable for its data, not whoever administers the software.","whyAsking":"Every approval in this engagement is that person's, and the contract is a statement about their system that they have to be able to read and refuse.","blocking":true,"kind":"owner"}
+  - {"id":"tools-and-scopes","question":"Which tools should the assistant have, and what is the narrowest scope each one needs?","recommendation":"List the jobs the assistant is meant to do, then write the smallest tool for each — search tickets in one queue rather than read the ticket database; comment on a ticket rather than update any field on it. Each tool states its scope in the contract, and the credential behind it is cut to that scope rather than the other way round. Anything that cannot be narrowed is written down as a tool the contract refuses.","whyAsking":"The tool list is the actual permission model: whatever is in it is what an assistant can do on a bad day, not only on a good one.","blocking":true,"kind":"permission"}
+  - {"id":"write-side","question":"Which of those tools write, and what does a duplicate of each write look like?","recommendation":"Separate the read tools from the write tools in the contract and, for each write, describe the duplicate: two tickets, two comments, two refunds. Every write-capable tool carries an idempotency key derived from the caller's intent, and the key is replayed as a test rather than assumed to work. A write that cannot be made idempotent is not offered as a tool; it is proposed as a draft for a person to apply.","whyAsking":"A retry is the normal behaviour of every agent and every network, so a write tool without a replayed key is a duplicate waiting for its first bad afternoon.","blocking":true,"kind":"schema"}
+outputs:
+  - "Tool contract"
+  - "Server build"
+  - "Conformance results"
+  - "Safety probe results"
+  - "Independent contract check"
+  - "Prepared deployment package"
+memory:
+  - "run working memory"
+  - "tenant facts"
+  - "verified outcome memory"
+handoffs:
+  - "vvdex-orchestrator"
+  - "project-brain"
+  - "evidence-qa"
+guardrails:
+  - "Enabling any write-capable tool on a deployed server"
+  - "Widening a tool's scope beyond the one stated in the contract"
+  - "Any external communication sent in the customer’s name"
+  - "Any irreversible write, delete, payment or permission change"
+  - "Any action below the configured confidence or policy threshold"

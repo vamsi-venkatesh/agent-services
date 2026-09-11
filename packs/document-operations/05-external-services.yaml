@@ -1,0 +1,28 @@
+service: document-operations
+selection_rules:
+  - Prefer the customer system of record over introducing a duplicate platform.
+  - Prefer APIs and typed connectors over browser automation.
+  - Use least-privilege, per-tenant credentials with revocation.
+  - Treat a hosted service's commercial terms as a decision separate from its technical fit.
+  - Record data region, subprocessors, retention and failure behavior.
+services:
+  - capability: "Document parsing"
+    preferred: "UnboundPDF + Docling"
+    alternatives: "Unstructured"
+    requirement: "Required"
+    note: "Common document model"
+  - capability: "OCR"
+    preferred: "PaddleOCR or Tesseract"
+    alternatives: "Cloud OCR where allowed"
+    requirement: "Conditional"
+    note: "Scans and multilingual text"
+  - capability: "Storage"
+    preferred: "S3-compatible encrypted storage"
+    alternatives: "Client DMS, SharePoint"
+    requirement: "Required"
+    note: "Original and derived artifacts"
+  - capability: "Business system"
+    preferred: "Existing ERP/CRM/DMS"
+    alternatives: "ERPNext, Paperless-ngx"
+    requirement: "Required"
+    note: "Destination of validated record"

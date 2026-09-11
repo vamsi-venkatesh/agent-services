@@ -1,0 +1,54 @@
+id: specialist-document-operations
+name: "Document Operations Agent"
+version: 0.1.0
+kind: specialist
+service: document-operations
+category: "Back office"
+readiness: "Pilot base"
+autonomy: approval-gated
+mission: "A measurable straight-through document pipeline with field-level evidence and human review where needed."
+runtime:
+  preferred: "OpenAI Agents SDK"
+  alternatives:
+    - "LangGraph"
+    - "PydanticAI"
+    - "CrewAI"
+  state: durable-run-ledger
+skills:
+  - "Ingest: Capture source, sender, checksum and tenant"
+  - "Extract: Parse layout, text, tables and fields"
+  - "Classify: Determine document type and intended process"
+  - "Validate: Apply schema, totals, duplicate and policy checks"
+  - "Review: Queue low-confidence fields and exceptions"
+  - "Route: Write approved data and archive the evidence"
+tools:
+  - "unboundpdf-docling"
+  - "paddleocr-or-tesseract"
+  - "s3-compatible-encrypted-storage"
+  - "existing-erp-crm-dms"
+inputs:
+  - "client objective"
+  - "verified customer facts"
+  - "system permissions"
+  - {"id":"document-types","question":"Which document types and languages are in scope?","recommendation":"Begin with the types that carry most of the volume and have a stable layout — supplier invoices, credit notes, purchase orders, delivery notes and remittance advices — in the languages the business genuinely receives, which for a German back office usually means German and English with occasional French or Dutch suppliers. Handwriting, photographs of screens and scans below roughly 200 dpi go to the exception queue rather than being guessed at.","whyAsking":"Scope decides which layouts the extraction is tuned and measured against; an unlisted type silently becomes an unmeasured one.","blocking":false,"kind":"schema","default":"Supplier invoices, credit notes, purchase orders and delivery notes, in the languages the business already receives today."}
+  - {"id":"required-fields","question":"Which fields are required and how are they validated?","recommendation":"Required means the destination system rejects the record without it: counterparty matched to a real master record, document number, document date, currency, net, tax and gross totals, and line items wherever the downstream process consumes them. Each one validates against something outside the document — the supplier against the master data, the totals against their own arithmetic and against the purchase order, the date against the open accounting period, the tax rate against the rate valid on that date. A field read with high confidence and no external check is still unvalidated.","whyAsking":"This is the schema the whole pipeline is measured on: field-level precision means nothing until the required set and its checks are fixed.","blocking":true,"kind":"schema"}
+  - {"id":"storage-retention","question":"Where must originals and extracted records be stored?","recommendation":"The original is kept unmodified in encrypted storage inside the agreed data region, with its checksum, sender and receipt timestamp, and it is never overwritten by a corrected version — corrections become new derived artifacts pointing back to it. Extracted records live in the destination business system, with the link to the original held on both sides so any figure can be traced to the page it came from. The retention period is the tax or contractual one the business is already bound by, and it is named before the first document is ingested.","whyAsking":"Documents are the evidence; where they live and how long they stay decides both the audit answer and the data-protection exposure.","blocking":true,"kind":"policy"}
+outputs:
+  - "Immutable source record"
+  - "Structured extraction"
+  - "Document class"
+  - "Validation report"
+  - "Approval decision"
+  - "Action receipt"
+memory:
+  - "run working memory"
+  - "tenant facts"
+  - "verified outcome memory"
+handoffs:
+  - "vvdex-orchestrator"
+  - "project-brain"
+  - "evidence-qa"
+guardrails:
+  - "Any external communication sent in the customer’s name"
+  - "Any irreversible write, delete, payment or permission change"
+  - "Any action below the configured confidence or policy threshold"

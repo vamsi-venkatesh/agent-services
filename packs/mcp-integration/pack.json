@@ -1,0 +1,687 @@
+{
+  "schema": "vvdex.service-pack-definition/v1",
+  "packId": "mcp-integration",
+  "notes": "Authored by hand from this pack's own row in data/services.json. All 16 blocks are authored and none takes the `missing` exemption. The contract is the product: every tool is written down with its scope, its read or write side and its idempotency key before a server exists, and the server is then checked against that document rather than the document being updated to match the server. Write-capable tools ship disabled; the one human gate is the systems owner enabling one, one at a time, and the enabling happens in the client's environment rather than in ours. A probe that reached a write holds every write-capable tool on that server, because the boundary it defeated is shared.",
+
+  "identity": {
+    "missing": [],
+    "name": "MCP Integration",
+    "category": "Engineering",
+    "targetUsers": "Businesses whose ticketing system, CRM or database is about to be connected to an AI assistant — in practice the person accountable for the records in that system, plus whoever is being asked to approve the connection.",
+    "problem": "An assistant is about to be pointed at a system of record and there is no written statement of what it would then be able to do. The usual shape is one broad integration built against an existing credential, with read and write behind the same tool, no idempotency key on anything, and no test at all for the case that matters: a hostile instruction arriving inside a record somebody outside the business wrote.",
+    "outcome": "A tool contract with per-tool conformance and safety-probe results, a server built against it with every write-capable tool disabled, and a deployment package the systems owner approves tool by tool.",
+    "permittedActions": [
+      "Write the tool contract: every tool, its scope, its read or write side, its idempotency key and whether its results carry content written outside the business.",
+      "Build the server against that contract with every write-capable tool disabled.",
+      "Run conformance tests per tool, including replaying each write tool's idempotency key.",
+      "Run safety probes against the built server: injection arriving through a tool result, scope escalation and cross-tenant reach.",
+      "Prepare a deployment package for the client's own platform, with the enabling order per tool and every write-capable tool still disabled."
+    ],
+    "prohibitedActions": [
+      "Offer a write-capable tool while any conformance check on it fails.",
+      "Offer a write-capable tool while any safety probe on the server is unresolved.",
+      "Ship a tool that is not in the contract, or whose scope is wider than the contract states.",
+      "Deploy the server into a client environment, or enable a tool there, on the client's behalf.",
+      "Hold a client credential for a server that could hold its own.",
+      "Combine a read and a write behind one tool with a flag."
+    ],
+    "nonDelegableDecisions": [
+      "Whether a write-capable tool is enabled at all belongs to the client's named systems owner — the person accountable for the records that tool can change — and is taken one tool at a time rather than as a set.",
+      "Whether a job that cannot be done with a narrow tool is granted a wide one is the systems owner's decision, and the contract's default is that the job stays with a person instead."
+    ],
+    "notThis": [
+      "Not an assistant. This pack builds the boundary a client's assistant talks through; what the assistant then does is a different engagement.",
+      "Not a managed service. It ends at a prepared package and per-tool results, not at a server somebody watches for you.",
+      "Not a multi-system gateway. One system per server, because a contract covering three systems cannot be approved tool by tool by anyone."
+    ]
+  },
+
+  "inputs": {
+    "missing": [],
+    "required": [
+      { "name": "System and owner statement", "type": "text/markdown", "why": "The one system to be exposed and the person accountable for its records. Every approval in the engagement is theirs, so the statement comes before the contract." },
+      { "name": "Job list", "type": "text/markdown", "why": "What the assistant is meant to do, in the business's own words. Tools are written from the jobs; a tool written from an existing credential is how integrations end up over-privileged." }
+    ],
+    "optional": [
+      { "name": "Credential scope list", "type": "text/csv", "why": "Existing credentials and what each is allowed to do, without secrets — so the contract can say where a scope has to be cut rather than discovering it at build time." }
+    ],
+    "acceptedTypes": ["text/markdown", "text/csv", "application/json"],
+    "requiredIntegrations": [
+      { "capability": "Systems in scope", "preferred": "Client systems of record", "why": "The one system the server exposes, named with its own owner before a single tool is written" },
+      { "capability": "Server runtime", "preferred": "Client-hosted MCP server", "why": "The server runs inside the client's own boundary and holds the client's own credential" },
+      { "capability": "Contract conformance and safety probes", "preferred": "VVDex MCP Conformance", "why": "Every tool's scope, read or write side, error shape and idempotency replay run as contract tests per tool and per build, and the same lane probes injection through a tool result and scope escalation on the built server" },
+      { "capability": "Run observability", "preferred": "Client tracing", "why": "The client's own tracing records every tool call, refusal and approval per tool" }
+    ]
+  },
+
+  "clarifications": {
+    "missing": [],
+    "items": [
+      {
+        "id": "system-and-owner",
+        "question": "Which system is being exposed, and who owns what happens inside it?",
+        "why": "Every approval in this engagement is that person's, and the contract is a statement about their system that they have to be able to read and refuse.",
+        "required": true,
+        "kind": "owner",
+        "conditions": "Always, before the contract is written. One system per server; a request covering three systems is three engagements.",
+        "allowedAssumption": null
+      },
+      {
+        "id": "tools-and-scopes",
+        "question": "Which tools should the assistant have, and what is the narrowest scope each one needs?",
+        "why": "The tool list is the actual permission model: whatever is in it is what an assistant can do on a bad day, not only on a good one.",
+        "required": true,
+        "kind": "permission",
+        "conditions": "Always. Anything that cannot be narrowed is written into the contract as a tool this server refuses, with the reason.",
+        "allowedAssumption": null
+      },
+      {
+        "id": "write-side",
+        "question": "Which of those tools write, and what does a duplicate of each write look like?",
+        "why": "A retry is the normal behaviour of every agent and every network, so a write tool without a replayed key is a duplicate waiting to happen.",
+        "required": true,
+        "kind": "schema",
+        "conditions": "Always, per write tool. A write that cannot be made idempotent is not offered as a tool; it is proposed as a draft for a person to apply.",
+        "allowedAssumption": null
+      },
+      {
+        "id": "untrusted-content",
+        "question": "Does any tool return content that people outside the business wrote?",
+        "why": "Injection arriving through a tool result is the failure mode this pack exists for, and the one a client cannot see from the outside.",
+        "required": false,
+        "kind": "policy",
+        "conditions": "Where the answer is not given, every tool that returns free text is treated as carrying untrusted content until a probe shows otherwise.",
+        "allowedAssumption": "Every tool returning free text written by anybody outside the business is marked as carrying untrusted content, probed for injection, and kept unreachable in the same turn as a write-capable tool without a fresh approval."
+      },
+      {
+        "id": "hosting-and-credential",
+        "question": "Where does the server run, and whose credential does it hold?",
+        "why": "Where the server runs decides who can switch it off, and that is the only control a client keeps after everything else is delegated.",
+        "required": false,
+        "kind": "other",
+        "conditions": "Where a client asks VVDex to host it, the dependency that creates is written into the contract rather than discovered later.",
+        "allowedAssumption": "Inside the client's own boundary, holding a client-issued credential the client can revoke without us, with the deployment package prepared for them to apply."
+      }
+    ],
+    "neverAssumeSilently": [
+      "Never assume a tool's scope is what the contract says; the scope is whatever the credential behind it allows, and the probe is what settles the difference.",
+      "Never assume a record's text was written inside the business. Ticket bodies, customer emails and form submissions all arrive from outside it.",
+      "Never assume an idempotency key works because it exists. It is replayed as a test, and the result is counted."
+    ]
+  },
+
+  "workflowSteps": {
+    "missing": [],
+    "steps": [
+      {
+        "id": "step-1",
+        "name": "Contract",
+        "purpose": "Write the tool contract: every tool, its scope, its read or write side and its idempotency key.",
+        "inputArtifacts": ["System and owner statement", "Job list"],
+        "outputArtifacts": ["Tool contract"],
+        "agentId": "sara-intake",
+        "toolIds": ["client-systems-of-record"],
+        "mode": "human-controlled",
+        "label": "The tool contract",
+        "doingVerb": "Naming every tool, its scope and its idempotency key",
+        "countNouns": ["tools contracted", "read-only tools", "write-capable tools"]
+      },
+      {
+        "id": "step-2",
+        "name": "Build",
+        "purpose": "Build the server against the contract with every write-capable tool disabled.",
+        "inputArtifacts": ["Tool contract"],
+        "outputArtifacts": ["Server build"],
+        "agentId": "specialist-mcp-integration",
+        "toolIds": ["client-hosted-mcp-server"],
+        "mode": "automatic",
+        "label": "The build",
+        "doingVerb": "Building the server with writes disabled",
+        "countNouns": ["tools implemented", "tools left disabled", "tools the system cannot support"]
+      },
+      {
+        "id": "step-3",
+        "name": "Conform",
+        "purpose": "Run the conformance tests per tool: schema, error shape, pagination and idempotency replay.",
+        "inputArtifacts": ["Server build"],
+        "outputArtifacts": ["Conformance results"],
+        "agentId": "specialist-mcp-integration",
+        "toolIds": ["vvdex-mcp-conformance"],
+        "mode": "automatic",
+        "label": "Conformance",
+        "doingVerb": "Running the conformance tests per tool",
+        "countNouns": ["checks run", "checks passing", "checks failing"]
+      },
+      {
+        "id": "step-4",
+        "name": "Probe",
+        "purpose": "Run the safety probes: injection through tool results, scope escalation and cross-tenant reach.",
+        "inputArtifacts": ["Conformance results"],
+        "outputArtifacts": ["Safety probe results"],
+        "agentId": "specialist-mcp-integration",
+        "toolIds": ["vvdex-mcp-conformance", "client-tracing"],
+        "mode": "automatic",
+        "label": "Safety probes",
+        "doingVerb": "Probing injection, escalation and cross-tenant reach",
+        "countNouns": ["probes run", "probes refused as designed", "probes that reached a write"],
+        "criteria": [
+          "Whether any instruction arriving inside a tool result changed what the server did",
+          "Whether a tool can be made to act outside the scope its contract states",
+          "Whether one tenant's identifier can reach another tenant's records",
+          "Whether a replayed idempotency key produces one effect or two",
+          "Whether an error response leaks a record the caller was not allowed to read",
+          "Which probes are unresolved, and which write-capable tools they hold"
+        ]
+      },
+      {
+        "id": "step-5",
+        "name": "Check",
+        "purpose": "Re-run the contract against the built server independently of whoever built it.",
+        "inputArtifacts": ["Safety probe results"],
+        "outputArtifacts": ["Independent contract check"],
+        "agentId": "evidence-qa",
+        "toolIds": ["vvdex-mcp-conformance", "evidence-ledger"],
+        "mode": "automatic",
+        "label": "The independent check",
+        "doingVerb": "Re-running the contract against the built server",
+        "countNouns": ["tools re-checked", "tools matching the contract", "tools that drifted from it"]
+      },
+      {
+        "id": "step-6",
+        "name": "Hand over",
+        "purpose": "Prepare the deployment package with every write-capable tool still disabled.",
+        "inputArtifacts": ["Independent contract check"],
+        "outputArtifacts": ["Prepared deployment package"],
+        "agentId": "specialist-mcp-integration",
+        "toolIds": ["approval-inbox"],
+        "mode": "human-controlled",
+        "label": "Handover",
+        "doingVerb": "Preparing the deployment package with writes disabled",
+        "countNouns": ["packages prepared", "tools offered for approval", "write-capable tools held"]
+      }
+    ],
+    "loops": [
+      {
+        "id": "loop-build-conform-probe-check",
+        "why": "A failing conformance check or an unresolved probe is a fault in what the implementation allows, so it returns to the build rather than to the contract, and the whole set — conformance, probes, independent check — runs again against the changed server. The cycle closes when the built server matches the contract tool for tool with every probe resolved.",
+        "steps": ["step-2", "step-3", "step-4", "step-5"]
+      }
+    ]
+  },
+
+  "decisionGates": {
+    "missing": [],
+    "gates": [
+      {
+        "id": "offer-decision",
+        "stepId": "step-5",
+        "question": "Which tools may be put in front of the systems owner at all — which ones match the contract, pass every conformance check, and are not held by an unresolved probe?",
+        "evidence": ["Tool contract", "Conformance results", "Safety probe results", "Independent contract check"],
+        "policy": "In this order, per tool. (1) A tool with any failing conformance check is not offered, and the build is changed before anything else is decided. (2) A write-capable tool is not offered while any safety probe on the server is unresolved; a probe that reached a write through a tool result disqualifies every write-capable tool on that server rather than only the tool it arrived through, because the boundary it defeated is shared by all of them. (3) A write-capable tool is not offered without an idempotency key that has been replayed and shown to produce one effect. (4) Read-only tools that satisfy (1) and (2) are offered together, because a read tool carries no effect to duplicate. (5) Write-capable tools that satisfy (1) to (3) are put to the client's systems owner one at a time, and that owner's approval per tool is the only thing that enables one.",
+        "outcomes": [
+          "Offer the read-only tools and hold every write-capable tool",
+          "Offer a write-capable tool for the systems owner's approval",
+          "Back to the build: a tool failed its conformance check"
+        ],
+        "scoreAppropriate": false,
+        "whyNoScore": "Every condition here is a property of one named tool on one named build: a check passed or it did not, a probe was resolved or it was not, a key was replayed or it was not. A number averaging nine tools would let six clean read tools carry a write tool that a probe walked through, which is exactly the tool the number would need to stop.",
+        "nonCompensable": [
+          "A full set of passing conformance checks never offsets an unresolved injection probe.",
+          "A narrow scope never offsets a write tool whose idempotency key has not been replayed.",
+          "Clean read-only tools never buy a write-capable tool its approval."
+        ],
+        "nonDelegableDecision": "Condition (5) hands the decision to the client's named systems owner: whether a write-capable tool is enabled on their system is theirs, one tool at a time, and no agent and no build result enables one."
+      }
+    ]
+  },
+
+  "humanGates": {
+    "missing": [],
+    "gates": [
+      {
+        "id": "approve-tool-enablement",
+        "requires": "Enabling any write-capable tool on a deployed server",
+        "approver": "The client's named systems owner — the person accountable for the records the tool can change",
+        "authorizes": "Enabling one named write-capable tool, at the scope the contract states, on one named server",
+        "onReject": "The tool stays disabled and remains in the package as a tool the server can offer but does not. The read-only tools are unaffected, and the refusal is recorded against the tool rather than against the engagement.",
+        "consumedOnce": true
+      }
+    ]
+  },
+
+  "branching": {
+    "missing": [],
+    "paths": [
+      {
+        "id": "path-contracted",
+        "kind": "success",
+        "from": "step-1",
+        "to": "step-2",
+        "when": "Every tool in the contract states its scope, its read or write side, its idempotency key and whether its results carry content written outside the business.",
+        "label": "Contract written — build"
+      },
+      {
+        "id": "path-built",
+        "kind": "success",
+        "from": "step-2",
+        "to": "step-3",
+        "when": "The server implements the contract with every write-capable tool disabled.",
+        "label": "Built with writes disabled — conform"
+      },
+      {
+        "id": "path-conformed",
+        "kind": "success",
+        "from": "step-3",
+        "to": "step-4",
+        "when": "The conformance suite has run against every tool, whatever its result.",
+        "label": "Conformance run — probe"
+      },
+      {
+        "id": "path-probed",
+        "kind": "success",
+        "from": "step-4",
+        "to": "step-5",
+        "when": "Every probe in the set has run against the built server and its result is recorded.",
+        "label": "Probes run — independent check"
+      },
+      {
+        "id": "path-conformance-failed",
+        "kind": "failure",
+        "from": "step-5",
+        "to": "step-2",
+        "when": "A tool failed a conformance check, so the implementation is changed and the whole set runs again.",
+        "label": "Conformance failed — back to the build"
+      },
+      {
+        "id": "path-drifted-from-contract",
+        "kind": "failure",
+        "from": "step-5",
+        "to": "step-2",
+        "when": "A tool on the server does not match its contract line, or the server offers a tool the contract does not contain.",
+        "label": "Drifted from the contract — back to the build"
+      },
+      {
+        "id": "path-offer-reads",
+        "kind": "success",
+        "from": "step-5",
+        "to": "step-6",
+        "when": "The read-only tools satisfy the policy and every write-capable tool is held by condition (2) or (3).",
+        "label": "Read-only tools offered, writes held"
+      },
+      {
+        "id": "path-offer-a-write",
+        "kind": "success",
+        "from": "step-5",
+        "to": "step-6",
+        "when": "A write-capable tool satisfies conditions (1) to (3) and may be put to the systems owner on its own.",
+        "label": "A write-capable tool is ready to be offered"
+      },
+      {
+        "id": "path-awaiting-owner",
+        "kind": "needs-information",
+        "from": "step-6",
+        "to": "approve-tool-enablement",
+        "when": "A write-capable tool is in the package and the systems owner has not yet decided on enabling it.",
+        "label": "Waiting on the systems owner"
+      },
+      {
+        "id": "path-handed-over",
+        "kind": "success",
+        "from": "step-6",
+        "to": "package-handed-over-writes-disabled",
+        "when": "The package is handed over with every write-capable tool disabled and the enabling order stated per tool.",
+        "label": "Handed over with writes disabled"
+      },
+      {
+        "id": "path-owner-enables",
+        "kind": "success",
+        "from": "approve-tool-enablement",
+        "to": "write-tool-enabled",
+        "when": "The systems owner approved one named write-capable tool and enabled it in their own environment.",
+        "label": "Approved — one write-capable tool enabled by the owner"
+      },
+      {
+        "id": "path-owner-declines",
+        "kind": "decline",
+        "from": "approve-tool-enablement",
+        "to": "integration-filed-unenabled",
+        "when": "The systems owner declined the write-capable tools outright and decided the assistant will read from this system and never change it.",
+        "label": "Declined — the write-capable tools are filed unenabled"
+      }
+    ],
+    "terminals": [
+      {
+        "id": "package-handed-over-writes-disabled",
+        "kind": "success",
+        "label": "Handed over — every write-capable tool disabled",
+        "reason": "The contract, the per-tool conformance results, the probe results and the independent check are sealed into one evidence bundle beside a package whose write-capable tools are all disabled.",
+        "sealed": true,
+        "evidence": ["Tool contract", "Conformance results", "Safety probe results", "Independent contract check", "Prepared deployment package"]
+      },
+      {
+        "id": "write-tool-enabled",
+        "kind": "success",
+        "label": "One write-capable tool enabled by the owner",
+        "reason": "The systems owner enabled one named tool at the scope the contract states. The approval, the tool, the scope and the probe results that stood behind it are sealed together.",
+        "sealed": true,
+        "evidence": ["Tool contract", "Safety probe results", "Prepared deployment package"]
+      },
+      {
+        "id": "integration-filed-unenabled",
+        "kind": "archive",
+        "label": "Archived — write-capable tools filed unenabled",
+        "configured": true,
+        "reason": "The systems owner declined the write-capable tools outright and decided the assistant will only read from this system, so those tools are filed unenabled with their probe results and nothing further is offered.",
+        "sealed": true
+      }
+    ],
+    "archivePath": "path-owner-declines",
+    "archiveNote": "The only way into the archive is the systems owner declining the write-capable tools outright. A tool held by a probe or a failing check is not archived: it goes back to the build, which is a run somebody is still working on."
+  },
+
+  "actions": {
+    "missing": [],
+    "actions": [
+      {
+        "id": "action-write-contract",
+        "scope": "internal",
+        "op": "integration-lane.write-contract",
+        "description": "Write the tool contract from the job list and the system statement, one line per tool that a non-engineer can refuse.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "integration-lane:write",
+        "sideEffects": "A document. Writing it touches no system and grants nothing."
+      },
+      {
+        "id": "action-build-server",
+        "scope": "internal",
+        "op": "integration-lane.build",
+        "description": "Build the MCP server against the contract in a lane of ours, with every write-capable tool disabled and no client credential bound.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "integration-lane:build",
+        "sideEffects": "None outside the lane. Without a client credential the tools answer from fixtures, which is what makes conformance testable before anything is connected."
+      },
+      {
+        "id": "action-run-conformance-and-probes",
+        "scope": "internal",
+        "op": "integration-lane.test",
+        "description": "Run the conformance suite and the safety probes against the built server, including replaying each write tool's idempotency key.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "integration-lane:execute",
+        "sideEffects": "Effects land in the lane's own fixture system, which is the point: a probe that produces two tickets does it here rather than in the client's queue."
+      },
+      {
+        "id": "action-prepare-deployment-package",
+        "scope": "internal",
+        "op": "integration-lane.prepare-package",
+        "description": "Prepare the deployment package for the client's own platform: the server, the contract, the per-tool results and the enabling order, with every write-capable tool disabled.",
+        "reversible": true,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "integration-lane:write",
+        "sideEffects": "A package handed to the systems owner. Preparing it connects nothing and enables nothing."
+      },
+      {
+        "id": "action-enable-write-capable-tool",
+        "scope": "external",
+        "op": "client-server.enable-tool",
+        "description": "Enable one named write-capable tool on the deployed server. This is the act that lets an assistant change records in the client's system, and it is performed by the client's systems owner in their own environment under their own approval — never by us, and never as a set.",
+        "reversible": true,
+        "consequential": true,
+        "requiresGateId": "approve-tool-enablement",
+        "permission": "client-server:enable-write-tool",
+        "performedBy": "The client's named systems owner, in the client's own environment",
+        "sideEffects": "From that moment an assistant can change records through that tool at the contract's scope. Reversible by disabling the tool again, which is why the tools are enabled one at a time and each one is traced separately."
+      },
+      {
+        "id": "action-append-receipt",
+        "scope": "internal",
+        "op": "evidence-ledger.append",
+        "description": "Append the contract, the per-tool conformance results, the probe results and the independent check to the evidence ledger.",
+        "reversible": false,
+        "consequential": false,
+        "requiresGateId": null,
+        "permission": "evidence-ledger:append",
+        "sideEffects": "Append-only inside VVDex. Irreversible by design and it leaves no external system."
+      }
+    ]
+  },
+
+  "artifacts": {
+    "missing": [],
+    "artifacts": [
+      { "id": "art-system-statement", "name": "System and owner statement", "type": "document", "fields": ["system", "records_held", "named_owner", "revocation_path"], "owner": "client", "versioning": "versioned", "evidence": ["Client statement naming the person accountable for the records"] },
+      { "id": "art-jobs", "name": "Job list", "type": "list", "fields": ["job", "who_does_it_today", "system_touched"], "owner": "client", "versioning": "versioned", "evidence": ["Intake record in the business's own words"] },
+      { "id": "art-contract", "name": "Tool contract", "type": "document", "fields": ["tool", "scope", "side", "idempotency_key", "untrusted_content", "refused_tools"], "owner": "run", "versioning": "versioned", "evidence": ["One line per tool, readable and refusable by the systems owner"] },
+      { "id": "art-build", "name": "Server build", "type": "bundle", "fields": ["tools_implemented", "tools_disabled", "build_id"], "owner": "run", "versioning": "versioned", "evidence": ["Build record listing which tools are disabled"] },
+      { "id": "art-conformance", "name": "Conformance results", "type": "report", "fields": ["tool", "schema", "error_shape", "pagination", "idempotency_replay"], "owner": "run", "versioning": "versioned", "evidence": ["Per-tool test output, per build"] },
+      { "id": "art-probes", "name": "Safety probe results", "type": "report", "fields": ["probe", "tool", "result", "what_it_reached", "resolved"], "owner": "run", "versioning": "versioned", "evidence": ["Traces of the calls each probe produced"] },
+      { "id": "art-check", "name": "Independent contract check", "type": "report", "fields": ["tool", "matches_contract", "drift", "held_by"], "owner": "run", "versioning": "versioned", "evidence": ["Check receipts written by the auditing agent, not by the builder"] },
+      { "id": "art-package", "name": "Prepared deployment package", "type": "bundle", "fields": ["server", "contract", "per_tool_results", "enabling_order", "systems_owner"], "owner": "client", "versioning": "versioned", "evidence": ["Handover record; an enablement receipt only where the owner returns one"] }
+    ]
+  },
+
+  "metrics": {
+    "missing": [],
+    "metrics": [
+      { "id": "m-contracted", "name": "Tools in the contract with a stated scope and idempotency key", "unit": "tools", "calculation": "Count of contract lines carrying a scope and, where the tool writes, an idempotency key — over the count of tools in the contract.", "threshold": null, "policy": null, "blocking": true },
+      { "id": "m-conformance", "name": "Conformance checks passing per tool", "unit": "checks", "calculation": "Passing conformance checks divided by checks run, per tool and per build, never pooled across tools.", "threshold": null, "policy": null, "blocking": true },
+      { "id": "m-probes", "name": "Safety probes refused as designed", "unit": "probes", "calculation": "Probes the server refused, over probes run, on the build being offered.", "threshold": 100, "policy": "Anything below every probe refused holds every write-capable tool under condition (2); a single probe that reached a write is disqualifying for all of them.", "blocking": true },
+      { "id": "m-writes-held", "name": "Write-capable tools still disabled at handover", "unit": "tools", "calculation": "Count of write-capable tools disabled in the package as handed over.", "threshold": null, "policy": null, "blocking": false }
+    ]
+  },
+
+  "receipts": {
+    "missing": [],
+    "items": [
+      {
+        "id": "receipt-contract",
+        "stepId": "step-1",
+        "inputs": ["System and owner statement", "Job list"],
+        "work": "Turned the jobs into the narrowest tools that can do them and wrote one contract line each: scope, read or write side, idempotency key, and whether the tool's results carry content written outside the business.",
+        "tools": ["client-systems-of-record"],
+        "outputs": ["Tool contract"],
+        "decisions": [],
+        "unknowns": ["Jobs that no narrow tool can do, which are recorded as refused tools with the reason"],
+        "errors": [],
+        "fingerprint": { "kind": "contract-digest", "computedFrom": "the contract lines: tool, scope, side, idempotency key and untrusted-content flag", "decorative": false },
+        "fingerprintNote": "The independent check compares the built server against this digest, so drift is detected against the document the owner read rather than against a later copy of it."
+      },
+      {
+        "id": "receipt-conformance",
+        "stepId": "step-3",
+        "inputs": ["Server build"],
+        "work": "Ran schema, error shape, pagination and idempotency replay against every tool on the build, and counted the results per tool.",
+        "tools": ["vvdex-mcp-conformance"],
+        "outputs": ["Conformance results"],
+        "decisions": [],
+        "unknowns": ["Pagination behaviour beyond the fixture's page count, which the client's real data volume will exercise differently"],
+        "errors": [],
+        "fingerprint": { "kind": "build-digest", "computedFrom": "the server build the checks were run against", "decorative": false },
+        "fingerprintNote": "Conformance results belong to one build; the digest is what stops a later build inheriting an earlier build's green."
+      },
+      {
+        "id": "receipt-probes",
+        "stepId": "step-4",
+        "inputs": ["Conformance results"],
+        "work": "Ran the probe set against the built server: instructions planted inside tool results, scope escalation attempts, cross-tenant identifiers and error responses, recording for each what it reached.",
+        "tools": ["vvdex-mcp-conformance", "client-tracing"],
+        "outputs": ["Safety probe results"],
+        "decisions": [],
+        "unknowns": ["Injection phrasings nobody has thought of; the probe set is a floor rather than a proof of safety"],
+        "errors": [],
+        "fingerprint": null,
+        "fingerprintNote": "A probe result is a trace reference and a verdict, not an artifact with an identity; what is hashed is the build it ran against."
+      },
+      {
+        "id": "receipt-check",
+        "stepId": "step-5",
+        "inputs": ["Safety probe results"],
+        "work": "Re-ran the contract against the built server tool by tool, independently of whoever built it, and recorded which tools match, which drifted and which are held by an unresolved probe.",
+        "tools": ["vvdex-mcp-conformance", "evidence-ledger"],
+        "outputs": ["Independent contract check"],
+        "decisions": ["offer-decision"],
+        "unknowns": ["Whether a tool's real scope matches its contract scope once the client's own credential is behind it, which only the client's environment can show"],
+        "errors": [],
+        "fingerprint": { "kind": "checked-build-digest", "computedFrom": "the build the independent check was run against", "decorative": false },
+        "fingerprintNote": "The package the owner receives carries this digest, so the server they deploy is provably the server the checks were run against."
+      }
+    ]
+  },
+
+  "agents": {
+    "missing": [],
+    "lead": ["specialist-mcp-integration"],
+    "active": ["sara-intake", "evidence-qa"],
+    "conditional": ["connector-steward"],
+    "followOn": ["project-brain"],
+    "participation": [
+      { "id": "specialist-mcp-integration", "part": "lead", "stepIds": ["step-2", "step-3", "step-4", "step-6"], "why": "Builds the server against the contract, runs the conformance suite and the probes, and prepares the package with every write-capable tool disabled." },
+      { "id": "sara-intake", "part": "active", "stepIds": ["step-1"], "why": "Takes the system, its owner and the jobs, and turns them into the contract line by line before anything is built." },
+      { "id": "evidence-qa", "part": "active", "stepIds": ["step-5"], "why": "Re-runs the contract against the built server independently of the builder, and names which tools drifted and which are held." },
+      { "id": "connector-steward", "part": "conditional", "stepIds": [], "why": "Appears only where a client's credential has to be scoped down to a tool's contract scope before a build can be tested against real shapes. In the default engagement the tools answer from fixtures and it does not participate." },
+      { "id": "project-brain", "part": "follow-on", "stepIds": [], "why": "Holds the refusals this pack is bound by — no tool outside the contract, no write enabled by us — and is consulted when a client later asks for a tool the contract refused." }
+    ]
+  },
+
+  "tools": {
+    "missing": [],
+    "required": ["client-systems-of-record", "client-hosted-mcp-server", "vvdex-mcp-conformance", "client-tracing"],
+    "recommended": [],
+    "optional": [],
+    "conditional": [],
+    "prohibited": [],
+    "available": ["strategy-planner", "service-catalogue", "client-brief-builder", "project-brain-policy", "mnema-memory", "approval-inbox", "evidence-ledger"],
+    "connected": [],
+    "connectedNote": "Nothing is connected in the public walkthrough, and in an engagement the default is that the build is tested against fixtures rather than against the client's live system. The server holds the client's own credential, in the client's own environment, and VVDex holds none.",
+    "usedInSample": [],
+    "usedInSampleNote": "No tool is used in the public sample. No system of record was read, no server was deployed, no probe was fired at anything outside the fixture and nothing was enabled — the sample is a recorded fixture over a synthetic ticketing system.",
+    "depictedInSample": ["client-systems-of-record", "client-hosted-mcp-server", "vvdex-mcp-conformance", "client-tracing"],
+    "depictedInSampleNote": "These are the tools a real integration would call at the steps the sample walks through. The sample depicts where each one sits; it calls none of them, and no client system was contacted in either direction."
+  },
+
+  "publicOutput": {
+    "missing": [],
+    "desk": "A tool contract with per-tool conformance and safety-probe results, and a package whose write-capable tools are disabled until the systems owner enables them one at a time.",
+    "cards": [
+      { "artifactId": "art-contract", "selected": true, "why": "One line per tool — what it can reach and what it can change — written so the person accountable for the records can refuse a line without reading any code." },
+      { "artifactId": "art-conformance", "selected": true, "why": "Per-tool results including the idempotency replay, because a write tool's key is either replayed or it is a duplicate waiting to happen." },
+      { "artifactId": "art-probes", "selected": true, "why": "What each probe reached, including the one that got through — the result a client cannot obtain from the outside." },
+      { "artifactId": "art-package", "selected": true, "why": "The package as handed over, showing which tools are enabled, which are disabled and in which order they may be turned on." }
+    ],
+    "exampleStructure": "One contract per server with one line per tool; one conformance report per build with four checks per tool; one probe report per build naming what each probe reached; one independent check per build; one package per handover with an enabling order; one approval per write-capable tool.",
+    "limitations": [
+      "The probe set is a floor, not a proof of safety. It covers the injection, escalation and cross-tenant classes we know; it cannot cover phrasings nobody has thought of.",
+      "Conformance is proven against fixtures and the client's own data volume will exercise pagination and error shapes differently; the first week on real data is part of the engagement, not after it.",
+      "A tool's real scope is whatever its credential allows. The contract states the intended scope and the probe tests it, but the client's environment is where the two finally meet.",
+      "Nothing is deployed or enabled by us. Where the systems owner never enables a tool, the evidence ends at the handover and says so.",
+      "This pack has zero external clients. The contract shape, the conformance suite and the probes are real and exercised inside VVDex; no client system has been exposed."
+    ],
+    "approvalsStillRequired": [
+      "Enabling any write-capable tool on a deployed server",
+      "Widening a tool's scope beyond the one stated in the contract",
+      "Any external communication sent in the customer’s name",
+      "Any irreversible write, delete, payment or permission change",
+      "Any action below the configured confidence or policy threshold"
+    ]
+  },
+
+  "simulationFixture": {
+    "missing": [],
+    "sampleInput": {
+      "brief": "A synthetic ticketing system is to be exposed to an assistant that should answer 'where is my ticket', summarise a queue and add a comment on behalf of an agent. Nine tools were contracted from those jobs: six read-only and three write-capable.",
+      "syntheticSystem": {
+        "note": "Synthetic fixture. The ticketing system, its tickets and its tenants were written for this walkthrough; no client system exists behind any of it.",
+        "system": "Ticketing system with two tenants and 240 fixture tickets",
+        "untrustedFields": ["ticket body", "customer comment", "web form submission"]
+      },
+      "contractedTools": {
+        "readOnly": ["ticket.search", "ticket.get", "queue.summarise", "customer.get", "comment.list", "attachment.list"],
+        "writeCapable": ["comment.add", "ticket.assign", "ticket.status.set"],
+        "refusedInContract": ["ticket.delete — no narrow form exists and no job needs it"]
+      },
+      "note": "Sample simulation. No external system was contacted."
+    },
+    "sampleOutputs": [
+      "Tool contract: nine tools, each with its scope, its read or write side and, for the three write tools, an idempotency key derived from the caller's intent",
+      "Server build with all three write-capable tools disabled",
+      "Conformance results: 36 checks over 9 tools, 34 passing and 2 failing, both on comment.add",
+      "Safety probe results: 12 probes, 11 refused as designed and 1 that reached a write — an instruction planted in a ticket body caused the server to call ticket.assign",
+      "Independent contract check: 9 of 9 tools match their contract lines, no tool on the server outside the contract",
+      "Prepared deployment package with the six read-only tools offered and all three write-capable tools held",
+      "No write-capable tool put to the systems owner, because one probe reached a write and that holds all three"
+    ],
+    "counters": [
+      { "label": "Tools contracted", "n": 9, "unit": "tools", "stepId": "step-1" },
+      { "label": "Read-only tools", "n": 6, "unit": "tools", "stepId": "step-1" },
+      { "label": "Write-capable tools", "n": 3, "unit": "tools", "stepId": "step-1" },
+      { "label": "Tools refused in the contract", "n": 1, "unit": "tools", "stepId": "step-1" },
+      { "label": "Tools implemented", "n": 9, "unit": "tools", "stepId": "step-2" },
+      { "label": "Tools left disabled", "n": 3, "unit": "tools", "stepId": "step-2" },
+      { "label": "Tools the system cannot support", "n": 0, "unit": "tools", "stepId": "step-2" },
+      { "label": "Checks run", "n": 36, "unit": "checks", "stepId": "step-3" },
+      { "label": "Checks passing", "n": 34, "unit": "checks", "stepId": "step-3" },
+      { "label": "Checks failing", "n": 2, "unit": "checks", "stepId": "step-3" },
+      { "label": "Tools with a failing check", "n": 1, "unit": "tools", "stepId": "step-3" },
+      { "label": "Idempotency keys replayed", "n": 3, "unit": "keys", "stepId": "step-3" },
+      { "label": "Replays that produced one effect", "n": 2, "unit": "keys", "stepId": "step-3" },
+      { "label": "Replays that produced two effects", "n": 1, "unit": "keys", "stepId": "step-3" },
+      { "label": "Probes run", "n": 12, "unit": "probes", "stepId": "step-4" },
+      { "label": "Probes refused as designed", "n": 11, "unit": "probes", "stepId": "step-4" },
+      { "label": "Probes that reached a write", "n": 1, "unit": "probes", "stepId": "step-4" },
+      { "label": "Tools re-checked", "n": 9, "unit": "tools", "stepId": "step-5" },
+      { "label": "Tools matching the contract", "n": 9, "unit": "tools", "stepId": "step-5" },
+      { "label": "Tools that drifted from it", "n": 0, "unit": "tools", "stepId": "step-5" },
+      { "label": "Packages prepared", "n": 1, "unit": "packages", "stepId": "step-6" },
+      { "label": "Tools offered for approval", "n": 6, "unit": "tools", "stepId": "step-6" },
+      { "label": "Write-capable tools held", "n": 3, "unit": "tools", "stepId": "step-6" },
+      { "label": "Tools enabled by VVDex", "n": 0, "unit": "tools", "stepId": "step-6" }
+    ],
+    "countersNote": "Fixture data for one worked example over a synthetic ticketing system, arithmetically closed: 9 tools split 6 read-only and 3 write-capable; 4 conformance checks per tool make 36, which split 34 passing and 2 failing, both of them on the one tool with a failing check — comment.add, which failed its idempotency replay and its error-shape check; the 3 idempotency replays are one per write tool and split 2 producing one effect and 1 producing two, which is that same comment.add; 12 probes split 11 refused and 1 that reached a write; all 9 tools were re-checked and all 9 matched, so 0 drifted. The 6 tools offered are the read-only ones and the 3 held are the write-capable ones. Nothing was deployed, nothing was enabled and no system outside the fixture was contacted.",
+    "branchResult": {
+      "gateId": "offer-decision",
+      "outcome": "Offer the read-only tools and hold every write-capable tool",
+      "pathId": "path-offer-reads",
+      "decidedBy": "Condition (2) of the offer policy: a probe planted an instruction inside a ticket body and the server called ticket.assign on reading it, so the boundary between untrusted content and a write is defeated on this build. That holds all three write-capable tools rather than only ticket.assign, because the boundary is shared by every write on the server. Condition (1) had already taken comment.add out on its own two failing checks.",
+      "notDecidedBy": "It was not decided by the six read-only tools, which passed every conformance check and every probe and are offered together under condition (4), nor by the independent check, which found all nine tools matching their contract lines and no tool on the server outside the contract. A clean contract match does not buy a write-capable tool its approval.",
+      "continues": ["path-offer-reads", "path-handed-over"],
+      "endsAt": "package-handed-over-writes-disabled",
+      "endsAtNote": "The sample ends with a package handed over and every write-capable tool disabled. The systems owner was asked to enable nothing, because the policy offered nothing to enable; the next build fixes the shared boundary and the probes run again."
+    },
+    "receipts": [
+      {
+        "stepId": "step-3",
+        "summary": "Ran 36 conformance checks over 9 tools: 34 passed. comment.add failed two — its idempotency replay produced two comments rather than one, and its error response carried the ticket body on a permission failure.",
+        "unknowns": ["Pagination was exercised over 240 fixture tickets; behaviour at the client's real volume is untested"]
+      },
+      {
+        "stepId": "step-4",
+        "summary": "Ran 12 probes against the built server. Eleven were refused as designed, including four scope-escalation attempts and three cross-tenant identifiers. One reached a write: an instruction inside a ticket body led the server to call ticket.assign while answering a read.",
+        "unknowns": ["The probe set covers the injection phrasings we know of; it is a floor and not a proof that no phrasing gets through"]
+      },
+      {
+        "stepId": "step-5",
+        "summary": "Re-ran the contract against the built server tool by tool: all 9 match their contract lines, including scopes, and the server offers no tool the contract does not contain. Six read-only tools are offerable; all three write-capable tools are held.",
+        "unknowns": ["Whether each tool's real scope matches its contract scope once the client's own credential sits behind it; only the client's environment can settle that"]
+      }
+    ],
+    "honesty": "Sample simulation. No external system was contacted.",
+    "fingerprint": null,
+    "fingerprintNote": "The sample shows no fingerprint. In a real integration two identities are genuinely computed and genuinely used — the contract digest the independent check compares the server against, and the build digest the handed-over package carries — but the system here is synthetic, and a hash over fixture data would be decoration presented as evidence."
+  },
+
+  "readinessState": {
+    "missing": [],
+    "stage": "simulation",
+    "publicLabel": "Simulation ready",
+    "simulationVisible": true,
+    "publicNotice": "Sample simulation. No external system was contacted.",
+    "catalogueReadiness": "Foundation ready",
+    "whyNotImplementation": "The contract shape, the conformance suite and the probe set are real and are exercised inside VVDex against this estate's own tool servers, where a write tool's idempotency key is replayed and an injection planted in a tool result is expected to reach nothing. What has never happened is an external integration: no client system of record has been exposed, no contract has been written for a client's systems owner, no server has been deployed into anybody's environment and no write-capable tool has been enabled anywhere. The walkthrough runs over a synthetic ticketing system, which is enough to simulate honestly and not enough to claim an implementation."
+  }
+}

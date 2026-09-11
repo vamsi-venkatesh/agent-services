@@ -1,0 +1,57 @@
+service: mcp-integration
+triggers:
+  - "New integration engagement"
+  - "Assistant about to be connected to a system of record"
+  - "New tool requested on an existing server"
+  - "Safety probe failure on a deployed server"
+workflow:
+  - step: 1
+    name: "Contract"
+    action: "Write the tool contract: every tool, its scope, its read or write side and its idempotency key"
+    output: "Tool contract"
+  - step: 2
+    name: "Build"
+    action: "Build the server against the contract with every write-capable tool disabled"
+    output: "Server build"
+  - step: 3
+    name: "Conform"
+    action: "Run the conformance tests per tool: schema, error shape, pagination and idempotency replay"
+    output: "Conformance results"
+  - step: 4
+    name: "Probe"
+    action: "Run the safety probes: injection through tool results, scope escalation and cross-tenant reach"
+    output: "Safety probe results"
+  - step: 5
+    name: "Check"
+    action: "Re-run the contract against the built server independently of whoever built it"
+    output: "Independent contract check"
+  - step: 6
+    name: "Hand over"
+    action: "Prepare the deployment package with every write-capable tool still disabled"
+    output: "Prepared deployment package"
+runtime:
+  task_ledger: postgres
+  retries: exponential-with-cap
+  idempotency: required-for-writes
+  resume: from-last-verified-checkpoint
+  timeout_behavior: stop-and-escalate
+  observability: trace-every-model-and-tool-call
+exception_queues:
+  - missing-data
+  - low-confidence
+  - policy-blocked
+  - external-system-failure
+  - human-review
+  - injection-probe-reached-a-write
+  - tool-scope-wider-than-the-contract
+  - idempotency-replay-produced-two-effects
+  - tool-awaiting-the-systems-owner
+completion_contract:
+  - verify_external_state
+  - attach_source_and_action_receipts
+  - record_cost_and_latency
+  - request_or_import_real_outcome
+  - update_memory_only_from_verified_outcome
+  - state_which_tools_are_enabled_and_which_remain_disabled
+  - attach_the_probe_results_beside_every_write_capable_tool
+  - record_that_the_deployment_package_was_prepared_and_not_deployed

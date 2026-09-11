@@ -1,0 +1,49 @@
+service: mcp-integration
+agent: specialist-mcp-integration
+selection_policy:
+  customer_system_first: true
+  typed_connector_before_browser: true
+  least_privilege_credentials: true
+  verify_external_writes: true
+tools:
+  - id: client-systems-of-record
+    name: "Client systems of record"
+    category: automation
+    permission: approval-gated-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "The one system the server exposes, named with its own owner before a single tool is written, because the contract is a statement about that system and no other"
+    alternatives:
+      - "Ticketing system"
+      - "CRM"
+      - "client database"
+  - id: client-hosted-mcp-server
+    name: "Client-hosted MCP server"
+    category: connector
+    permission: read-write
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "The server runs inside the client's own boundary and holds the client's own credential, so nothing on the path depends on a credential VVDex holds"
+    alternatives:
+      - "Client container platform"
+      - "client serverless runtime"
+  - id: vvdex-mcp-conformance
+    name: "VVDex MCP Conformance"
+    category: connector
+    permission: approval-gated-write
+    status: ready
+    connection: internal
+    purpose: "Every tool's scope, read or write side, error shape and idempotency replay run as contract tests per tool and per build, and the same lane probes injection arriving through a tool result and scope escalation on the built server before any write-capable tool is offered"
+    alternatives:
+      - "Custom probe set"
+      - "custom fixtures"
+  - id: client-tracing
+    name: "Client tracing"
+    category: assurance
+    permission: read
+    status: adapter-ready
+    connection: client-scoped
+    purpose: "The client's own tracing, bound with the client's own credential, records every tool call, refusal and approval per tool, so a probe result can be traced back to the call that produced it"
+    alternatives:
+      - "Client trace store"
+      - "client log pipeline"

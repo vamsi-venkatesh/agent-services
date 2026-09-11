@@ -1,0 +1,50 @@
+service: document-operations
+triggers:
+  - "New attachment"
+  - "New upload"
+  - "Folder event"
+  - "Manual reprocess"
+workflow:
+  - step: 1
+    name: "Ingest"
+    action: "Capture source, sender, checksum and tenant"
+    output: "Immutable source record"
+  - step: 2
+    name: "Extract"
+    action: "Parse layout, text, tables and fields"
+    output: "Structured extraction"
+  - step: 3
+    name: "Classify"
+    action: "Determine document type and intended process"
+    output: "Document class"
+  - step: 4
+    name: "Validate"
+    action: "Apply schema, totals, duplicate and policy checks"
+    output: "Validation report"
+  - step: 5
+    name: "Review"
+    action: "Queue low-confidence fields and exceptions"
+    output: "Approval decision"
+  - step: 6
+    name: "Route"
+    action: "Write approved data and archive the evidence"
+    output: "Action receipt"
+runtime:
+  task_ledger: postgres
+  retries: exponential-with-cap
+  idempotency: required-for-writes
+  resume: from-last-verified-checkpoint
+  timeout_behavior: stop-and-escalate
+  observability: trace-every-model-and-tool-call
+exception_queues:
+  - missing-data
+  - low-confidence
+  - policy-blocked
+  - external-system-failure
+  - human-review
+completion_contract:
+  - verify_external_state
+  - attach_source_and_action_receipts
+  - record_cost_and_latency
+  - request_or_import_real_outcome
+  - update_memory_only_from_verified_outcome

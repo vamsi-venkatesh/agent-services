@@ -1,0 +1,57 @@
+id: n8n-automation-rescue
+name: "n8n Automation Rescue"
+version: 0.1.0
+kind: service
+tier: A
+readiness: "Foundation ready"
+autonomy: approval-gated
+summary: "Takes a broken or brittle n8n or Make workflow somebody else built, reproduces the failure deterministically from the export and the execution log, names the cause with the alternatives it excluded, and prepares the smallest safe fix as a workflow diff."
+buyer: "Businesses running an automation they did not build — an n8n or Make workflow that fails intermittently, fails silently, or has failed since a change nobody on the team made — who cannot afford to have it edited live while it is failing."
+outcome: "A named cause with the evidence that excluded the alternatives, and the smallest safe correction prepared as a workflow diff with a regression run plan and a way back, ready for the workflow's owner to import."
+channels:
+  - "Operator workspace"
+  - "Client workflow export"
+  - "Client execution log"
+  - "Handover session"
+core:
+  - "Sara specialist runtime"
+  - "MNEMA customer facts and outcome memory"
+  - "Project Brain policies, approvals and evidence"
+  - "Postgres task, receipt and audit ledger"
+  - "Service Lab evaluation harness"
+policy:
+  ai_disclosure: required
+  tenant_isolation: required
+  evidence_provenance: field-level
+  consequential_actions: approval-gated
+  memory_write: verified-outcome-only
+approvals:
+  - "Importing a prepared workflow diff into the client's own instance"
+  - "Reading an execution log that carries the client's customer data"
+  - "Any external communication sent in the customer’s name"
+  - "Any irreversible write, delete, payment or permission change"
+  - "Any action below the configured confidence or policy threshold"
+metrics:
+  - "Failing executions reproduced deterministically"
+  - "Candidate causes excluded with a stated observation"
+  - "Nodes changed in the prepared diff"
+  - "Regression set passing against the patched export"
+source_references:
+  - "Activepieces"
+  - "n8n"
+  - "Temporal"
+  - "Trigger.dev"
+laws:
+  - "The rescue is reproduced from the export and the recorded executions. A workflow that could not be made to fail on demand has not been diagnosed."
+  - "Nothing is ever edited on a live instance. The output is a diff and an import package the owner applies."
+  - "A cause is named only with the alternatives that were excluded and the observation that excluded each one."
+  - "The smallest diff wins: a node outside the failing path is left alone even when it is obviously untidy."
+  - "The reproduction case is frozen as a regression test before the fix is written, so the fix cannot be tuned to a moving target."
+  - "The way back is written before the import package is handed over, and it is written for the owner to execute without us."
+deliverables:
+  - "A rescue brief naming the workflow, the executions and the data that was and was not copied"
+  - "A deterministic failure case, frozen as a regression test"
+  - "A root cause with the alternatives excluded and the observation behind each exclusion"
+  - "A node-by-node workflow diff with a reason per change"
+  - "An import package with a regression run plan and a written way back"
+readiness_honesty: "The reproduction lane is real: this runtime replays a workflow export against recorded executions with every write adapter stubbed, and the estate operates its own n8n instance. What has never happened is an external rescue — no client instance has been read, no client execution log has been opened, no prepared diff has been imported anywhere. Foundation ready means the lane and the evidence ledger exist and are exercised inside VVDex, and nothing in this pack is a delivery record."

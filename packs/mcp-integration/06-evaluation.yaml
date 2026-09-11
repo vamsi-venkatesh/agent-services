@@ -1,0 +1,54 @@
+service: mcp-integration
+release_gate:
+  required_fixture_pass_rate: 1.0
+  consequential_action_without_approval: 0
+  cross_tenant_leakage: 0
+  unsupported_claims_in_golden_set: 0
+  write_capable_tools_enabled_at_handover: 0
+  tools_shipped_outside_the_contract: 0
+  unresolved_injection_probes_with_writes_offered: 0
+  write_tools_without_a_replayed_idempotency_key: 0
+metrics:
+  - "Tools in the contract with a stated scope and idempotency key"
+  - "Conformance checks passing per tool"
+  - "Safety probes refused as designed"
+  - "Write-capable tools still disabled at handover"
+adversarial_cases:
+  - "A prompt injection arriving inside a tool result and reaching a write-capable tool"
+  - "A tool whose scope is wider than the contract says, because the credential behind it is wider"
+  - "A retried write producing a second ticket, a second record or a second charge"
+  - "Prompt injection or untrusted instructions arriving through connected content"
+  - "Cross-tenant data exposure or over-broad connector permissions"
+  - "Duplicate side effects after retries or network timeouts"
+  - "Unsupported claims presented without source evidence"
+mandatory_tests:
+  - happy_path_with_realistic_fixture
+  - missing_required_field
+  - conflicting_sources
+  - stale_or_revoked_credential
+  - duplicate_event_and_retry
+  - prompt_injection_inside_connected_content
+  - cross_tenant_access_attempt
+  - human_rejection_and_resume
+  - provider_timeout_and_recovery
+  - receipt_matches_real_external_state
+service_specific_tests:
+  - "injection_inside_a_tool_result_does_not_reach_a_write_capable_tool"
+  - "scope_escalation_attempt_is_refused_and_receipted"
+  - "cross_tenant_identifier_returns_nothing_from_another_tenant"
+  - "replayed_idempotency_key_produces_one_effect_not_two"
+  - "error_response_leaks_no_record_the_caller_could_not_read"
+  - "every_shipped_tool_matches_its_contract_line_for_line"
+  - "write_capable_tools_are_disabled_in_the_handed_over_package"
+must_refuse:
+  - "Offer a write-capable tool while any conformance check on it fails."
+  - "Offer a write-capable tool while any safety probe on the server is unresolved."
+  - "Ship a tool whose scope is wider than the contract states."
+  - "Deploy the server into a client environment on the client's behalf."
+  - "Hold a client credential for a server that could hold its own."
+certification:
+  prototype: happy_path_demo
+  sandbox_ready: fixtures_and_negative_tests_pass
+  pilot_ready: customer_data_approvals_and_failure_handling_pass
+  production_ready: tenancy_monitoring_cost_retention_and_incident_controls_pass
+  outcome_proven: real_outcome_sample_supports_claim_with_limitations

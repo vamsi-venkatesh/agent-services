@@ -1,0 +1,43 @@
+id: document-operations
+name: "Document Operations Agent"
+version: 0.1.0
+kind: service
+tier: A
+readiness: "Pilot base"
+autonomy: approval-gated
+summary: "Turns incoming PDFs, scans, email attachments and office files into validated records and routed exceptions."
+buyer: "Accounting, logistics, wholesale, property management, agencies and document-heavy back offices."
+outcome: "A measurable straight-through document pipeline with field-level evidence and human review where needed."
+channels:
+  - "Email inbox"
+  - "Watched folder"
+  - "Upload portal"
+  - "API"
+core:
+  - "Sara specialist runtime"
+  - "MNEMA customer facts and outcome memory"
+  - "Project Brain policies, approvals and evidence"
+  - "Postgres task, receipt and audit ledger"
+  - "Service Lab evaluation harness"
+policy:
+  ai_disclosure: required
+  tenant_isolation: required
+  evidence_provenance: field-level
+  consequential_actions: approval-gated
+  memory_write: verified-outcome-only
+approvals:
+  - "Any external communication sent in the customer’s name"
+  - "Any irreversible write, delete, payment or permission change"
+  - "Any action below the configured confidence or policy threshold"
+metrics:
+  - "Field-level precision"
+  - "Straight-through rate"
+  - "Exception precision"
+  - "Processing time"
+source_references:
+  - "Docling"
+  - "PaddleOCR"
+  - "Unstructured"
+  - "OCRmyPDF"
+  - "Paperless-ngx"
+  - "RAGFlow"
