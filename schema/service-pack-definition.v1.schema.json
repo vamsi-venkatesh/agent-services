@@ -1,0 +1,597 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/vamsi-venkatesh/agent-services-public/main/schema/service-pack-definition.v1.schema.json",
+  "title": "VVDex service pack definition, version 1",
+  "description": "What a service pack means, as opposed to what it looks like. Sixteen blocks state the pack's own semantics so that no renderer, runtime or report has to supply them. Every block carries a `missing` array: an empty array means the block is complete, and a non-empty array names the field paths the block does not yet state. A block never falls back to a default.",
+  "type": "object",
+  "required": [
+    "schema",
+    "packId",
+    "identity",
+    "inputs",
+    "clarifications",
+    "workflowSteps",
+    "decisionGates",
+    "humanGates",
+    "branching",
+    "actions",
+    "artifacts",
+    "metrics",
+    "receipts",
+    "agents",
+    "tools",
+    "publicOutput",
+    "simulationFixture",
+    "readinessState"
+  ],
+  "properties": {
+    "schema": { "const": "vvdex.service-pack-definition/v1" },
+    "packId": { "$ref": "#/$defs/identifier" },
+    "notes": { "type": "string" },
+
+    "identity": {
+      "description": "Block 1. Who the pack is for, what it does, and the three lists that bound it.",
+      "type": "object",
+      "required": [
+        "missing",
+        "name",
+        "category",
+        "targetUsers",
+        "problem",
+        "outcome",
+        "permittedActions",
+        "prohibitedActions",
+        "nonDelegableDecisions"
+      ],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "name": { "$ref": "#/$defs/sentence" },
+        "category": { "$ref": "#/$defs/sentence" },
+        "targetUsers": { "$ref": "#/$defs/sentence" },
+        "problem": { "$ref": "#/$defs/sentence" },
+        "outcome": { "$ref": "#/$defs/sentence" },
+        "promise": { "$ref": "#/$defs/sentence" },
+        "permittedActions": { "$ref": "#/$defs/sentences" },
+        "prohibitedActions": { "$ref": "#/$defs/sentences" },
+        "nonDelegableDecisions": { "$ref": "#/$defs/sentences" },
+        "notThis": { "$ref": "#/$defs/sentences" }
+      }
+    },
+
+    "inputs": {
+      "description": "Block 2. What the run needs before it starts, and which capability each integration covers.",
+      "type": "object",
+      "required": ["missing", "required", "optional", "acceptedTypes", "requiredIntegrations"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "required": { "type": "array", "items": { "$ref": "#/$defs/input" } },
+        "optional": { "type": "array", "items": { "$ref": "#/$defs/input" } },
+        "acceptedTypes": { "$ref": "#/$defs/strings" },
+        "requiredIntegrations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["capability", "preferred", "why"],
+            "properties": {
+              "capability": { "$ref": "#/$defs/sentence" },
+              "preferred": { "$ref": "#/$defs/sentence" },
+              "alternatives": { "$ref": "#/$defs/sentence" },
+              "why": { "$ref": "#/$defs/sentence" }
+            }
+          }
+        }
+      }
+    },
+
+    "clarifications": {
+      "description": "Block 3. The questions the pack asks rather than answering on the client's behalf, and the assumptions it may never make silently.",
+      "type": "object",
+      "required": ["missing", "items", "neverAssumeSilently"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "question", "why", "required", "kind", "conditions", "allowedAssumption"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "question": { "$ref": "#/$defs/sentence" },
+              "why": { "$ref": "#/$defs/sentence" },
+              "required": { "type": "boolean" },
+              "kind": { "enum": ["schema", "policy", "permission", "owner", "other"] },
+              "conditions": { "$ref": "#/$defs/sentence" },
+              "allowedAssumption": { "type": ["string", "null"] },
+              "blocksStep": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "neverAssumeSilently": { "$ref": "#/$defs/sentences" }
+      }
+    },
+
+    "workflowSteps": {
+      "description": "Block 4. The ordered steps, each naming its own artifacts, its agent, its tools and the nouns it counts. A step that does not name its nouns has none supplied for it.",
+      "type": "object",
+      "required": ["missing", "steps", "loops"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "purpose",
+              "inputArtifacts",
+              "outputArtifacts",
+              "agentId",
+              "toolIds",
+              "mode",
+              "label",
+              "doingVerb",
+              "countNouns"
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "name": { "$ref": "#/$defs/sentence" },
+              "purpose": { "$ref": "#/$defs/sentence" },
+              "inputArtifacts": { "$ref": "#/$defs/strings" },
+              "outputArtifacts": { "$ref": "#/$defs/strings" },
+              "agentId": { "type": ["string", "null"], "pattern": "^[A-Za-z0-9_.:-]+$" },
+              "toolIds": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+              "mode": { "enum": ["automatic", "human-controlled", "client-owned"] },
+              "label": { "$ref": "#/$defs/sentence" },
+              "doingVerb": { "$ref": "#/$defs/sentence" },
+              "countNouns": { "$ref": "#/$defs/strings" },
+              "criteria": { "$ref": "#/$defs/sentences" }
+            }
+          }
+        },
+        "loops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "steps", "why"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "steps": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+              "why": { "$ref": "#/$defs/sentence" }
+            }
+          }
+        }
+      }
+    },
+
+    "decisionGates": {
+      "description": "Block 5. The decisions the graph itself takes, with the evidence each one reads and the outcomes it may reach. A gate states its own question; nothing writes it on the pack's behalf.",
+      "type": "object",
+      "required": ["missing", "gates"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "stepId",
+              "question",
+              "evidence",
+              "policy",
+              "outcomes",
+              "scoreAppropriate",
+              "nonCompensable",
+              "nonDelegableDecision"
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "stepId": { "$ref": "#/$defs/identifier" },
+              "question": { "$ref": "#/$defs/sentence" },
+              "evidence": { "$ref": "#/$defs/strings" },
+              "policy": { "$ref": "#/$defs/sentence" },
+              "outcomes": { "$ref": "#/$defs/sentences" },
+              "scoreAppropriate": { "type": "boolean" },
+              "whyScore": { "type": ["string", "null"] },
+              "whyNoScore": { "type": ["string", "null"] },
+              "nonCompensable": { "$ref": "#/$defs/sentences" },
+              "nonDelegableDecision": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "humanGates": {
+      "description": "Block 6. The points where a named person authorizes something. An authorization is consumed once and states what it covers and what a rejection does.",
+      "type": "object",
+      "required": ["missing", "gates"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "requires", "approver", "authorizes", "onReject", "consumedOnce"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "requires": { "$ref": "#/$defs/sentence" },
+              "approver": { "$ref": "#/$defs/sentence" },
+              "authorizes": { "$ref": "#/$defs/sentence" },
+              "onReject": { "$ref": "#/$defs/sentence" },
+              "consumedOnce": { "type": "boolean" },
+              "reAuthorizedWhen": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "branching": {
+      "description": "Block 7. Every path the run can take and every way it can end. A terminal states whether it seals a receipt and how, if at all, the run resumes.",
+      "type": "object",
+      "required": ["missing", "paths", "terminals", "archivePath", "archiveNote"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "from", "to", "when", "label"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "kind": {
+                "enum": ["success", "revision", "escalation", "decline", "failure", "needs-information"]
+              },
+              "from": { "$ref": "#/$defs/identifier" },
+              "to": { "$ref": "#/$defs/identifier" },
+              "when": { "$ref": "#/$defs/sentence" },
+              "label": { "$ref": "#/$defs/sentence" }
+            }
+          }
+        },
+        "terminals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "label", "reason"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "kind": { "enum": ["success", "escalation", "archive", "failure", "needs-information"] },
+              "label": { "$ref": "#/$defs/sentence" },
+              "configured": { "type": ["boolean", "null"] },
+              "reason": { "$ref": "#/$defs/sentence" },
+              "resumesVia": { "type": ["string", "null"] },
+              "sealed": { "type": "boolean" },
+              "evidence": { "$ref": "#/$defs/strings" }
+            }
+          }
+        },
+        "archivePath": { "type": ["string", "null"] },
+        "archiveNote": { "$ref": "#/$defs/sentence" }
+      }
+    },
+
+    "actions": {
+      "description": "Block 8. Every operation the pack may perform, its scope, whether it can be undone and which human gate authorizes it. An action that is consequential and has no gate is a defect.",
+      "type": "object",
+      "required": ["missing", "actions"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "scope",
+              "op",
+              "description",
+              "reversible",
+              "consequential",
+              "requiresGateId",
+              "permission",
+              "sideEffects"
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "scope": { "enum": ["internal", "external"] },
+              "op": { "type": "string", "minLength": 1 },
+              "description": { "$ref": "#/$defs/sentence" },
+              "reversible": { "type": "boolean" },
+              "consequential": { "type": "boolean" },
+              "requiresGateId": { "type": ["string", "null"] },
+              "permission": { "type": "string", "minLength": 1 },
+              "sideEffects": { "$ref": "#/$defs/sentence" },
+              "performedBy": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "artifacts": {
+      "description": "Block 9. What the run produces or reads, who owns it, how it is versioned and what evidence stands behind it.",
+      "type": "object",
+      "required": ["missing", "artifacts"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "type", "fields", "owner", "versioning", "evidence"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "name": { "$ref": "#/$defs/sentence" },
+              "type": { "$ref": "#/$defs/sentence" },
+              "fields": { "$ref": "#/$defs/strings" },
+              "owner": { "enum": ["run", "client"] },
+              "versioning": { "$ref": "#/$defs/sentence" },
+              "evidence": { "$ref": "#/$defs/sentences" }
+            }
+          }
+        }
+      }
+    },
+
+    "metrics": {
+      "description": "Block 10. What the pack measures, how each number is calculated, and which thresholds block a release.",
+      "type": "object",
+      "required": ["missing", "metrics"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "unit", "calculation", "threshold", "policy", "blocking"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "name": { "$ref": "#/$defs/sentence" },
+              "unit": { "$ref": "#/$defs/sentence" },
+              "calculation": { "$ref": "#/$defs/sentence" },
+              "threshold": { "type": ["number", "string", "null"] },
+              "policy": { "type": ["string", "null"] },
+              "blocking": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+
+    "receipts": {
+      "description": "Block 11. One receipt template per step: what went in, what was done, what came out, what stayed unknown. Unknowns are recorded rather than resolved by assumption.",
+      "type": "object",
+      "required": ["missing", "items"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "stepId", "inputs", "work", "tools", "outputs", "decisions", "unknowns", "errors"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "stepId": { "$ref": "#/$defs/identifier" },
+              "inputs": { "$ref": "#/$defs/strings" },
+              "work": { "$ref": "#/$defs/sentence" },
+              "tools": { "$ref": "#/$defs/strings" },
+              "outputs": { "$ref": "#/$defs/strings" },
+              "decisions": { "$ref": "#/$defs/sentences" },
+              "unknowns": { "$ref": "#/$defs/sentences" },
+              "errors": { "$ref": "#/$defs/sentences" },
+              "fingerprint": { "$ref": "#/$defs/fingerprint" },
+              "fingerprintNote": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "agents": {
+      "description": "Block 12. The agents in the pack, bucketed by how they take part, and pinned to the steps where they take part. An agent presented as participating is pinned to steps or it is not presented.",
+      "type": "object",
+      "required": ["missing", "lead", "active", "conditional", "followOn", "participation"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "lead": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "active": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "conditional": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "followOn": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "participation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "part", "stepIds", "why"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "part": { "enum": ["lead", "active", "conditional", "follow-on"] },
+              "stepIds": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+              "why": { "$ref": "#/$defs/sentence" }
+            }
+          }
+        }
+      }
+    },
+
+    "tools": {
+      "description": "Block 13. Tool buckets for this pack. `connected` and `usedInSample` are separate from `depictedInSample`: a tool drawn in a walkthrough was not thereby called.",
+      "type": "object",
+      "required": [
+        "missing",
+        "required",
+        "optional",
+        "conditional",
+        "available",
+        "connected",
+        "connectedNote",
+        "usedInSample",
+        "usedInSampleNote",
+        "depictedInSample",
+        "depictedInSampleNote"
+      ],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "required": { "$ref": "#/$defs/identifiers" },
+        "recommended": { "$ref": "#/$defs/identifiers" },
+        "optional": { "$ref": "#/$defs/identifiers" },
+        "conditional": { "$ref": "#/$defs/identifiers" },
+        "conditionalNote": { "type": ["string", "null"] },
+        "prohibited": { "$ref": "#/$defs/identifiers" },
+        "available": { "$ref": "#/$defs/identifiers" },
+        "connected": { "$ref": "#/$defs/identifiers" },
+        "connectedNote": { "$ref": "#/$defs/sentence" },
+        "usedInSample": { "$ref": "#/$defs/identifiers" },
+        "usedInSampleNote": { "$ref": "#/$defs/sentence" },
+        "depictedInSample": { "$ref": "#/$defs/identifiers" },
+        "depictedInSampleNote": { "$ref": "#/$defs/sentence" }
+      }
+    },
+
+    "publicOutput": {
+      "description": "Block 14. What a reader of the public surface is shown, what the sample cannot show, and which approvals a real engagement still needs.",
+      "type": "object",
+      "required": ["missing", "desk", "cards", "exampleStructure", "limitations", "approvalsStillRequired"],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "desk": { "$ref": "#/$defs/sentence" },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["artifactId", "selected", "why"],
+            "properties": {
+              "artifactId": { "$ref": "#/$defs/identifier" },
+              "selected": { "type": "boolean" },
+              "why": { "$ref": "#/$defs/sentence" }
+            }
+          }
+        },
+        "exampleStructure": { "$ref": "#/$defs/sentence" },
+        "limitations": { "$ref": "#/$defs/sentences" },
+        "approvalsStillRequired": { "$ref": "#/$defs/sentences" }
+      }
+    },
+
+    "simulationFixture": {
+      "description": "Block 15. The deterministic sample: fictional input, the outputs it produces, the counters it reports and the branch it reaches. Counters carry the step they were counted at.",
+      "type": "object",
+      "required": [
+        "missing",
+        "sampleInput",
+        "sampleOutputs",
+        "counters",
+        "countersNote",
+        "branchResult",
+        "receipts",
+        "honesty"
+      ],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "sampleInput": { "type": "object", "required": ["brief", "note"] },
+        "sampleOutputs": { "type": "array", "items": { "type": ["string", "object"] } },
+        "counters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "n", "unit", "stepId"],
+            "properties": {
+              "label": { "$ref": "#/$defs/sentence" },
+              "n": { "type": ["number", "null"] },
+              "unit": { "$ref": "#/$defs/sentence" },
+              "stepId": { "$ref": "#/$defs/identifier" }
+            }
+          }
+        },
+        "countersNote": { "$ref": "#/$defs/sentence" },
+        "branchResult": {
+          "type": "object",
+          "required": ["gateId", "outcome", "pathId"],
+          "properties": {
+            "gateId": { "$ref": "#/$defs/identifier" },
+            "outcome": { "$ref": "#/$defs/sentence" },
+            "pathId": { "$ref": "#/$defs/identifier" },
+            "decidedBy": { "$ref": "#/$defs/sentence" }
+          }
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stepId", "summary", "unknowns"],
+            "properties": {
+              "stepId": { "$ref": "#/$defs/identifier" },
+              "summary": { "$ref": "#/$defs/sentence" },
+              "unknowns": { "$ref": "#/$defs/sentences" }
+            }
+          }
+        },
+        "honesty": { "$ref": "#/$defs/sentence" },
+        "fingerprint": { "$ref": "#/$defs/fingerprint" },
+        "fingerprintNote": { "type": ["string", "null"] }
+      }
+    },
+
+    "readinessState": {
+      "description": "Block 16. How far the pack has been taken, stated in one place so that no surface can imply more.",
+      "type": "object",
+      "required": [
+        "missing",
+        "stage",
+        "publicLabel",
+        "simulationVisible",
+        "publicNotice",
+        "catalogueReadiness",
+        "whyNotImplementation"
+      ],
+      "properties": {
+        "missing": { "$ref": "#/$defs/missing" },
+        "stage": { "enum": ["definition", "simulation", "pilot", "implementation"] },
+        "publicLabel": { "$ref": "#/$defs/sentence" },
+        "simulationVisible": { "type": "boolean" },
+        "publicNotice": { "$ref": "#/$defs/sentence" },
+        "catalogueReadiness": { "$ref": "#/$defs/sentence" },
+        "whyNotImplementation": { "$ref": "#/$defs/sentence" }
+      }
+    }
+  },
+
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]+$" },
+    "identifiers": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+    "sentence": { "type": "string", "minLength": 1 },
+    "sentences": { "type": "array", "items": { "$ref": "#/$defs/sentence" } },
+    "strings": { "type": "array", "items": { "type": "string" } },
+    "fingerprint": {
+      "description": "How a run identifies a byte-for-byte thing it read or produced. `decorative: false` means the digest is computed from real bytes; null means this receipt fingerprints nothing.",
+      "type": ["object", "null"],
+      "required": ["kind", "computedFrom", "decorative"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/sentence" },
+        "computedFrom": { "$ref": "#/$defs/sentence" },
+        "decorative": { "type": "boolean" }
+      }
+    },
+    "missing": {
+      "description": "Field paths this block does not state. Empty means the block is complete. A missing field is never filled in from elsewhere.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "input": {
+      "type": "object",
+      "required": ["name", "type", "why"],
+      "properties": {
+        "name": { "$ref": "#/$defs/sentence" },
+        "type": { "$ref": "#/$defs/sentence" },
+        "why": { "$ref": "#/$defs/sentence" },
+        "acceptedTypes": { "$ref": "#/$defs/strings" }
+      }
+    }
+  }
+}

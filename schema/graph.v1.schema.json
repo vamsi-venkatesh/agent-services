@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/vamsi-venkatesh/agent-services-public/main/schema/graph.v1.schema.json",
+  "title": "VVDex compiled service graph, version 1",
+  "description": "The compiled execution graph of one service pack. Nodes are typed, edges carry a branch type, and exactly one node is a human gate. Structural rules that a schema cannot express (one gate, authorized side effects only past the gate, every terminal reachable) are checked by tools/validate-pack.mjs.",
+  "type": "object",
+  "required": [
+    "schema",
+    "serviceId",
+    "name",
+    "startNodeId",
+    "nodeCount",
+    "edgeCount",
+    "humanGateCount",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schema": { "const": "vvdex.service-graph/v1" },
+    "serviceId": { "$ref": "#/$defs/identifier" },
+    "name": { "type": "string", "minLength": 1 },
+    "category": { "type": "string" },
+    "family": { "type": "string" },
+    "riskClass": { "enum": ["low", "medium", "high"] },
+    "serviceVersion": { "type": "string" },
+    "graphVersion": { "type": "string" },
+    "definitionHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "startNodeId": { "$ref": "#/$defs/identifier" },
+    "nodeCount": { "type": "integer", "minimum": 1 },
+    "edgeCount": { "type": "integer", "minimum": 0 },
+    "humanGateCount": { "const": 1 },
+    "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+    "publicBoundary": { "$ref": "#/$defs/publicBoundary" }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+$" },
+    "nodeType": {
+      "description": "intake takes the run's input. deterministic runs fixed logic. model_reasoning runs a model. parallel_worker runs inside a concurrency group. aggregator joins a concurrency group. independent_verifier re-checks the work in restricted fresh context. policy_decision chooses the branch. side_effect_preparation writes nothing outside the run; it prepares a write. artifact_creation produces a deliverable. human_gate holds the run for a named person. result_verification checks the produced result. terminal ends one path.",
+      "enum": [
+        "intake",
+        "deterministic",
+        "model_reasoning",
+        "parallel_worker",
+        "aggregator",
+        "independent_verifier",
+        "policy_decision",
+        "side_effect_preparation",
+        "artifact_creation",
+        "human_gate",
+        "result_verification",
+        "terminal"
+      ]
+    },
+    "sideEffect": {
+      "description": "none writes nothing. prepared holds a write that no person has authorized. authorized is a write a person authorized at the human gate.",
+      "enum": ["none", "prepared", "authorized"]
+    },
+    "branchType": {
+      "description": "clean is the ordinary path. exception leaves it for the gate. approval and rejection are the two ways out of the gate. escalation hands the run to another authority. retry returns the run to an earlier node.",
+      "enum": ["clean", "exception", "approval", "rejection", "escalation", "retry"]
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "label", "type", "index", "sideEffect"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/nodeType" },
+        "index": { "type": "integer", "minimum": 0 },
+        "concurrencyGroup": { "type": ["string", "null"] },
+        "sideEffect": { "$ref": "#/$defs/sideEffect" }
+      },
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id", "source", "target", "branchType"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/identifier" },
+        "target": { "$ref": "#/$defs/identifier" },
+        "branchType": { "$ref": "#/$defs/branchType" }
+      },
+      "additionalProperties": false
+    },
+    "publicBoundary": {
+      "type": "object",
+      "required": ["fixtureOnly", "externalWrites"],
+      "properties": {
+        "fixtureOnly": { "type": "boolean" },
+        "externalWrites": { "type": "integer", "minimum": 0 },
+        "unresolvedImplementationDecisions": { "type": "integer", "minimum": 0 },
+        "memoryPromotion": { "type": "string" }
+      }
+    }
+  }
+}
