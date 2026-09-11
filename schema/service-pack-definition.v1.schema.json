@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/vamsi-venkatesh/agent-services-public/main/schema/service-pack-definition.v1.schema.json",
+  "$id": "https://raw.githubusercontent.com/vamsi-venkatesh/agent-services/main/schema/service-pack-definition.v1.schema.json",
   "title": "VVDex service pack definition, version 1",
   "description": "What a service pack means, as opposed to what it looks like. Sixteen blocks state the pack's own semantics so that no renderer, runtime or report has to supply them. Every block carries a `missing` array: an empty array means the block is complete, and a non-empty array names the field paths the block does not yet state. A block never falls back to a default.",
   "type": "object",

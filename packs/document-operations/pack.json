@@ -1,8 +1,6 @@
 {
   "schema": "vvdex.service-pack-definition/v1",
   "packId": "document-operations",
-  "notes": "Authored by hand against directive §8. The counted nouns here are documents, pages, fields, document types, checks and writes — a pipeline whose whole claim is that a figure can be traced to the page it came from. Two axes carry the pack: a field read with high confidence and no external check is still unvalidated, and a write that cannot be undone is prepared and gated rather than made. The decision gate asks both together, and the fixture exercises the review hold that matters most in practice — an invoice whose totals do not reconcile and whose bank details differ from the supplier master record.",
-
   "identity": {
     "missing": [],
     "name": "Document Operations Agent",
@@ -33,7 +31,6 @@
       "The retention period and the data region the originals live in, set by the client before the first document is ingested."
     ]
   },
-
   "inputs": {
     "missing": [],
     "required": [
@@ -41,37 +38,60 @@
         "name": "Incoming documents",
         "type": "document set",
         "why": "The PDFs, scans, attachments and office files themselves, from the email inbox, watched folder, upload portal or API. The original is the evidence, so it is an input in its own right rather than a carrier for the fields inside it.",
-        "acceptedTypes": ["application/pdf", "image/jpeg", "image/png", "image/tiff", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "message/rfc822"]
+        "acceptedTypes": [
+          "application/pdf",
+          "image/jpeg",
+          "image/png",
+          "image/tiff",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "message/rfc822"
+        ]
       },
       {
         "name": "Document type and language scope",
         "type": "policy",
         "why": "Which types and languages are measured and tuned for. An unlisted type silently becomes an unmeasured one, so scope is stated rather than discovered from what arrives.",
-        "acceptedTypes": ["application/json", "text/markdown"]
+        "acceptedTypes": [
+          "application/json",
+          "text/markdown"
+        ]
       },
       {
         "name": "Required field schema",
         "type": "policy",
         "why": "Which fields the destination system rejects a record without, and what each one validates against outside the document. This is the schema the whole pipeline is measured on.",
-        "acceptedTypes": ["application/json", "text/markdown"]
+        "acceptedTypes": [
+          "application/json",
+          "text/markdown"
+        ]
       },
       {
         "name": "Counterparty master data",
         "type": "system reference",
         "why": "The supplier, customer and account records a document's counterparty must match to. It is what turns a name on a page into a party the business already knows, and it is what makes a changed bank detail visible.",
-        "acceptedTypes": ["business system reference", "application/json"]
+        "acceptedTypes": [
+          "business system reference",
+          "application/json"
+        ]
       },
       {
         "name": "Storage and retention policy",
         "type": "policy",
         "why": "Where originals and derived artifacts live, in which data region, and for how long — the tax or contractual period the business is already bound by, named before the first document is ingested.",
-        "acceptedTypes": ["application/json", "text/markdown"]
+        "acceptedTypes": [
+          "application/json",
+          "text/markdown"
+        ]
       },
       {
         "name": "Write reversibility policy",
         "type": "policy",
         "why": "Which downstream writes can be undone and which cannot. Retries and timeouts are normal; whether they are harmless depends entirely on this list, and it decides what the gate covers.",
-        "acceptedTypes": ["application/json", "text/markdown"]
+        "acceptedTypes": [
+          "application/json",
+          "text/markdown"
+        ]
       }
     ],
     "optional": [
@@ -79,19 +99,29 @@
         "name": "Purchase orders and prior documents",
         "type": "record",
         "why": "The purchase order a document's lines are checked against, and the documents already processed that the duplicate check compares to. Optional because a business without purchase orders still has every other check.",
-        "acceptedTypes": ["business system reference", "text/csv", "application/json"]
+        "acceptedTypes": [
+          "business system reference",
+          "text/csv",
+          "application/json"
+        ]
       },
       {
         "name": "Field confidence thresholds",
         "type": "policy",
         "why": "The per-field level above which a read has been shown correct on a real sample. Optional because a new engagement has no measurement yet, in which case every required field is reviewed until there is one.",
-        "acceptedTypes": ["application/json", "text/csv"]
+        "acceptedTypes": [
+          "application/json",
+          "text/csv"
+        ]
       },
       {
         "name": "Approval decision",
         "type": "decision record",
         "why": "What the reviewer decided about a queued field or a gated write. It is an input rather than a step output because no step of this pack takes it — it arrives from the client's own people, and until it does the document holds.",
-        "acceptedTypes": ["approval record", "application/json"]
+        "acceptedTypes": [
+          "approval record",
+          "application/json"
+        ]
       }
     ],
     "acceptedTypes": [
@@ -128,7 +158,6 @@
       }
     ]
   },
-
   "clarifications": {
     "missing": [],
     "items": [
@@ -192,7 +221,6 @@
       "Never assume a write succeeded because the call did, and never assume it can be undone unless the reversibility policy says so."
     ]
   },
-
   "workflowSteps": {
     "missing": [],
     "steps": [
@@ -200,53 +228,105 @@
         "id": "step-1",
         "name": "Ingest",
         "purpose": "Capture each document with its source, sender, receipt time, checksum and tenant, store the original unmodified in the agreed region, and reject at intake only what cannot be read at all.",
-        "inputArtifacts": ["Incoming documents", "Storage and retention policy", "Document type and language scope"],
-        "outputArtifacts": ["Immutable source record"],
+        "inputArtifacts": [
+          "Incoming documents",
+          "Storage and retention policy",
+          "Document type and language scope"
+        ],
+        "outputArtifacts": [
+          "Immutable source record"
+        ],
         "agentId": "sara-intake",
-        "toolIds": ["s3-compatible-encrypted-storage", "unboundpdf-docling"],
+        "toolIds": [
+          "s3-compatible-encrypted-storage",
+          "unboundpdf-docling"
+        ],
         "mode": "automatic",
         "label": "Intake",
         "doingVerb": "Capturing source, sender and checksum",
-        "countNouns": ["documents received", "documents stored", "documents rejected at intake"]
+        "countNouns": [
+          "documents received",
+          "documents stored",
+          "documents rejected at intake"
+        ]
       },
       {
         "id": "step-2",
         "name": "Extract",
         "purpose": "Parse layout, text, tables and fields, running OCR on the pages that need it, with every extracted value carrying the page and region it was read from and its own confidence.",
-        "inputArtifacts": ["Immutable source record"],
-        "outputArtifacts": ["Structured extraction"],
+        "inputArtifacts": [
+          "Immutable source record"
+        ],
+        "outputArtifacts": [
+          "Structured extraction"
+        ],
         "agentId": "specialist-document-operations",
-        "toolIds": ["unboundpdf-docling", "paddleocr-or-tesseract"],
+        "toolIds": [
+          "unboundpdf-docling",
+          "paddleocr-or-tesseract"
+        ],
         "mode": "automatic",
         "label": "Extraction",
         "doingVerb": "Parsing layout, text, tables and fields",
-        "countNouns": ["documents parsed", "fields extracted", "pages needing OCR"]
+        "countNouns": [
+          "documents parsed",
+          "fields extracted",
+          "pages needing OCR"
+        ]
       },
       {
         "id": "step-3",
         "name": "Classify",
         "purpose": "Determine the document type and the process it belongs to, so the right required-field schema applies, and set aside anything that matches no known type rather than forcing it into the nearest one.",
-        "inputArtifacts": ["Structured extraction", "Document type and language scope"],
-        "outputArtifacts": ["Document class"],
+        "inputArtifacts": [
+          "Structured extraction",
+          "Document type and language scope"
+        ],
+        "outputArtifacts": [
+          "Document class"
+        ],
         "agentId": "specialist-document-operations",
-        "toolIds": ["unboundpdf-docling", "project-brain-policy"],
+        "toolIds": [
+          "unboundpdf-docling",
+          "project-brain-policy"
+        ],
         "mode": "automatic",
         "label": "Classification",
         "doingVerb": "Determining document type and destination process",
-        "countNouns": ["documents classified", "document types found", "documents of unknown type"]
+        "countNouns": [
+          "documents classified",
+          "document types found",
+          "documents of unknown type"
+        ]
       },
       {
         "id": "step-4",
         "name": "Validate",
         "purpose": "Apply the required-field schema, the arithmetic, the duplicate check and the policy checks — each against something outside the document — then apply the document boundary and record the deciding condition.",
-        "inputArtifacts": ["Document class", "Required field schema", "Counterparty master data", "Purchase orders and prior documents", "Field confidence thresholds", "Write reversibility policy"],
-        "outputArtifacts": ["Validation report"],
+        "inputArtifacts": [
+          "Document class",
+          "Required field schema",
+          "Counterparty master data",
+          "Purchase orders and prior documents",
+          "Field confidence thresholds",
+          "Write reversibility policy"
+        ],
+        "outputArtifacts": [
+          "Validation report"
+        ],
         "agentId": "evidence-qa",
-        "toolIds": ["existing-erp-crm-dms", "project-brain-policy"],
+        "toolIds": [
+          "existing-erp-crm-dms",
+          "project-brain-policy"
+        ],
         "mode": "automatic",
         "label": "Validation",
         "doingVerb": "Applying schema, totals, duplicate and policy checks",
-        "countNouns": ["documents validated", "checks passed", "checks failed"],
+        "countNouns": [
+          "documents validated",
+          "checks passed",
+          "checks failed"
+        ],
         "criteria": [
           "Supplier or counterparty matched to a real master record",
           "Document number and date present and plausible for the period",
@@ -261,43 +341,76 @@
         "id": "step-5",
         "name": "Review",
         "purpose": "Put the queued fields and failed checks in front of a human with the page each value was read from, record their corrections against the field rather than the document, and take their decision on anything that must be confirmed outside the document.",
-        "inputArtifacts": ["Validation report", "Immutable source record"],
-        "outputArtifacts": ["Approval decision"],
+        "inputArtifacts": [
+          "Validation report",
+          "Immutable source record"
+        ],
+        "outputArtifacts": [
+          "Approval decision"
+        ],
         "agentId": null,
-        "toolIds": ["approval-inbox", "s3-compatible-encrypted-storage"],
+        "toolIds": [
+          "approval-inbox",
+          "s3-compatible-encrypted-storage"
+        ],
         "mode": "client-owned",
         "label": "Human review",
         "doingVerb": "Queueing low-confidence fields and exceptions",
-        "countNouns": ["documents in review", "fields corrected", "documents rejected"]
+        "countNouns": [
+          "documents in review",
+          "fields corrected",
+          "documents rejected"
+        ]
       },
       {
         "id": "step-6",
         "name": "Route",
         "purpose": "Write the approved data into the destination business system where the write is reversible, keyed by the document checksum so a retry updates the same record, and archive the derived evidence beside the original.",
-        "inputArtifacts": ["Approval decision", "Validation report", "Structured extraction"],
-        "outputArtifacts": ["Action receipt"],
+        "inputArtifacts": [
+          "Approval decision",
+          "Validation report",
+          "Structured extraction"
+        ],
+        "outputArtifacts": [
+          "Action receipt"
+        ],
         "agentId": "vvdex-orchestrator",
-        "toolIds": ["existing-erp-crm-dms", "s3-compatible-encrypted-storage", "evidence-ledger"],
+        "toolIds": [
+          "existing-erp-crm-dms",
+          "s3-compatible-encrypted-storage",
+          "evidence-ledger"
+        ],
         "mode": "human-controlled",
         "label": "Posting",
         "doingVerb": "Writing approved data and archiving the evidence",
-        "countNouns": ["records written", "documents archived", "writes that failed"]
+        "countNouns": [
+          "records written",
+          "documents archived",
+          "writes that failed"
+        ]
       }
     ],
     "loops": [
       {
         "id": "review-revalidate",
-        "steps": ["step-4", "step-5"],
+        "steps": [
+          "step-4",
+          "step-5"
+        ],
         "why": "A corrected field changes the record, so the checks run again on the corrected values rather than being taken as passed because a human looked at them. Totals that failed before a correction have to reconcile after it."
       },
       {
         "id": "unreadable-recapture",
-        "steps": ["step-1", "step-2", "step-3", "step-4"],
+        "steps": [
+          "step-1",
+          "step-2",
+          "step-3",
+          "step-4"
+        ],
         "why": "A document that cannot be parsed to its required fields goes back to intake with the reason named, so the sender can supply a readable copy. The pipeline never proceeds on a partial read of an unreadable page."
       }
     ]
   },
-
   "decisionGates": {
     "missing": [],
     "gates": [
@@ -336,7 +449,6 @@
       }
     ]
   },
-
   "humanGates": {
     "missing": [],
     "gates": [
@@ -368,7 +480,6 @@
       }
     ]
   },
-
   "branching": {
     "missing": [],
     "paths": [
@@ -569,7 +680,6 @@
     "archivePath": null,
     "archiveNote": "There is no archive terminal in this pack, and the word needs care here because the pack does archive documents: the Route step archives the derived evidence beside the original, which is retention and the whole point of the service. What it never does is dispose of a run by filing it away. Every stop is a document somebody is waiting on — a duplicate pair for a reviewer, an unreadable scan for its sender, a prepared posting for the finance owner, a rejected value with its reason, a write nobody can find. A document filed away unprocessed is an unpaid supplier or an unrecorded liability, and the client would discover it from the counterparty rather than from us."
   },
-
   "actions": {
     "missing": [],
     "actions": [
@@ -663,7 +773,6 @@
       }
     ]
   },
-
   "artifacts": {
     "missing": [],
     "artifacts": [
@@ -671,131 +780,252 @@
         "id": "art-incoming",
         "name": "Incoming documents",
         "type": "document set",
-        "fields": ["file", "source channel", "sender", "received at", "pages", "media type"],
+        "fields": [
+          "file",
+          "source channel",
+          "sender",
+          "received at",
+          "pages",
+          "media type"
+        ],
         "owner": "client",
         "versioning": "immutable; a replacement copy is a new document linked to this one and both are retained",
-        "evidence": ["The file exactly as it arrived"]
+        "evidence": [
+          "The file exactly as it arrived"
+        ]
       },
       {
         "id": "art-scope",
         "name": "Document type and language scope",
         "type": "policy",
-        "fields": ["document type", "languages", "in scope", "required-field schema", "measured on"],
+        "fields": [
+          "document type",
+          "languages",
+          "in scope",
+          "required-field schema",
+          "measured on"
+        ],
         "owner": "client",
         "versioning": "versioned; the version in force is named on every classification",
-        "evidence": ["The client's own list of what their back office receives"]
+        "evidence": [
+          "The client's own list of what their back office receives"
+        ]
       },
       {
         "id": "art-field-schema",
         "name": "Required field schema",
         "type": "policy",
-        "fields": ["field", "required for which document type", "what it validates against outside the document", "destination system field"],
+        "fields": [
+          "field",
+          "required for which document type",
+          "what it validates against outside the document",
+          "destination system field"
+        ],
         "owner": "client",
         "versioning": "versioned; the version in force is named on every validation report",
-        "evidence": ["The destination system's own rejection rules"]
+        "evidence": [
+          "The destination system's own rejection rules"
+        ]
       },
       {
         "id": "art-master-data",
         "name": "Counterparty master data",
         "type": "system reference",
-        "fields": ["counterparty", "identifiers", "payment details of record", "status", "read at"],
+        "fields": [
+          "counterparty",
+          "identifiers",
+          "payment details of record",
+          "status",
+          "read at"
+        ],
         "owner": "client",
         "versioning": "the client's own master data, read at a stated time; every match cites when it was read",
-        "evidence": ["The business system's own counterparty record"]
+        "evidence": [
+          "The business system's own counterparty record"
+        ]
       },
       {
         "id": "art-retention",
         "name": "Storage and retention policy",
         "type": "policy",
-        "fields": ["data region", "encryption", "retention period", "what may be deleted and by whom"],
+        "fields": [
+          "data region",
+          "encryption",
+          "retention period",
+          "what may be deleted and by whom"
+        ],
         "owner": "client",
         "versioning": "versioned; a change applies to documents ingested after it and never retroactively deletes",
-        "evidence": ["The tax or contractual obligation the client is already bound by"]
+        "evidence": [
+          "The tax or contractual obligation the client is already bound by"
+        ]
       },
       {
         "id": "art-reversibility",
         "name": "Write reversibility policy",
         "type": "policy",
-        "fields": ["write", "destination system", "reversible", "how it is undone", "who approves it when it is not"],
+        "fields": [
+          "write",
+          "destination system",
+          "reversible",
+          "how it is undone",
+          "who approves it when it is not"
+        ],
         "owner": "client",
         "versioning": "versioned; the version in force is named on every boundary decision that turns on it",
-        "evidence": ["The destination system's own behaviour, confirmed with the systems owner"]
+        "evidence": [
+          "The destination system's own behaviour, confirmed with the systems owner"
+        ]
       },
       {
         "id": "art-prior-documents",
         "name": "Purchase orders and prior documents",
         "type": "record",
-        "fields": ["purchase order", "lines", "document number", "checksum", "processed at"],
+        "fields": [
+          "purchase order",
+          "lines",
+          "document number",
+          "checksum",
+          "processed at"
+        ],
         "owner": "client",
         "versioning": "read-only history from the business system; used for the line check and the duplicate check",
-        "evidence": ["The business system's own records"]
+        "evidence": [
+          "The business system's own records"
+        ]
       },
       {
         "id": "art-thresholds",
         "name": "Field confidence thresholds",
         "type": "policy",
-        "fields": ["field", "threshold", "sample it was measured on", "measured at", "always reviewed"],
+        "fields": [
+          "field",
+          "threshold",
+          "sample it was measured on",
+          "measured at",
+          "always reviewed"
+        ],
         "owner": "client",
         "versioning": "versioned per measurement; a threshold with no sample behind it is recorded as unmeasured",
-        "evidence": ["The sample of real documents the threshold was derived from"]
+        "evidence": [
+          "The sample of real documents the threshold was derived from"
+        ]
       },
       {
         "id": "art-source-record",
         "name": "Immutable source record",
         "type": "record",
-        "fields": ["document", "checksum", "source channel", "sender", "received at", "tenant", "storage location", "retention until"],
+        "fields": [
+          "document",
+          "checksum",
+          "source channel",
+          "sender",
+          "received at",
+          "tenant",
+          "storage location",
+          "retention until"
+        ],
         "owner": "client",
         "versioning": "immutable and write-once; corrections are new derived artifacts pointing back to it",
-        "evidence": ["The stored original, byte for byte as it arrived"]
+        "evidence": [
+          "The stored original, byte for byte as it arrived"
+        ]
       },
       {
         "id": "art-extraction",
         "name": "Structured extraction",
         "type": "table",
-        "fields": ["field", "value", "page", "region on the page", "confidence of read", "read by parse or OCR"],
+        "fields": [
+          "field",
+          "value",
+          "page",
+          "region on the page",
+          "confidence of read",
+          "read by parse or OCR"
+        ],
         "owner": "client",
         "versioning": "versioned per extraction run; a re-extraction supersedes rather than editing",
-        "evidence": ["The page and region behind every value"]
+        "evidence": [
+          "The page and region behind every value"
+        ]
       },
       {
         "id": "art-class",
         "name": "Document class",
         "type": "record",
-        "fields": ["document type", "destination process", "required-field schema applied", "scope version", "unknown type"],
+        "fields": [
+          "document type",
+          "destination process",
+          "required-field schema applied",
+          "scope version",
+          "unknown type"
+        ],
         "owner": "client",
         "versioning": "one per classification; a re-classification after a scope change produces a new record",
-        "evidence": ["The scope version applied and the features the type was determined from"]
+        "evidence": [
+          "The scope version applied and the features the type was determined from"
+        ]
       },
       {
         "id": "art-validation",
         "name": "Validation report",
         "type": "report",
-        "fields": ["check", "result", "what it was validated against", "fields below their threshold", "totals reconciliation", "duplicate check on number and checksum", "payment details against the master record", "write reversibility", "deciding condition at the boundary"],
+        "fields": [
+          "check",
+          "result",
+          "what it was validated against",
+          "fields below their threshold",
+          "totals reconciliation",
+          "duplicate check on number and checksum",
+          "payment details against the master record",
+          "write reversibility",
+          "deciding condition at the boundary"
+        ],
         "owner": "client",
         "versioning": "one per validation run; a correction produces a new report rather than editing this one",
-        "evidence": ["Each check's own working, with the outside source it was checked against"]
+        "evidence": [
+          "Each check's own working, with the outside source it was checked against"
+        ]
       },
       {
         "id": "art-approval-decision",
         "name": "Approval decision",
         "type": "decision record",
-        "fields": ["field or write", "reviewer", "decision", "correction made", "page consulted", "decided at"],
+        "fields": [
+          "field or write",
+          "reviewer",
+          "decision",
+          "correction made",
+          "page consulted",
+          "decided at"
+        ],
         "owner": "client",
         "versioning": "immutable per decision; a changed decision is a new record referencing this one",
-        "evidence": ["The reviewer's own correction, recorded against the field with the page they read"]
+        "evidence": [
+          "The reviewer's own correction, recorded against the field with the page they read"
+        ]
       },
       {
         "id": "art-action-receipt",
         "name": "Action receipt",
         "type": "receipt",
-        "fields": ["record written", "destination system", "checksum key", "fields written with their pages", "approver where the write was gated", "archived evidence location", "written at"],
+        "fields": [
+          "record written",
+          "destination system",
+          "checksum key",
+          "fields written with their pages",
+          "approver where the write was gated",
+          "archived evidence location",
+          "written at"
+        ],
         "owner": "client",
         "versioning": "immutable per write; a retry under the same key produces a new receipt referencing this one",
-        "evidence": ["The destination system's own record identifier, read back after the write"]
+        "evidence": [
+          "The destination system's own record identifier, read back after the write"
+        ]
       }
     ]
   },
-
   "metrics": {
     "missing": [],
     "metrics": [
@@ -873,32 +1103,55 @@
       }
     ]
   },
-
   "receipts": {
     "missing": [],
     "items": [
       {
         "id": "receipt-ingest",
         "stepId": "step-1",
-        "inputs": ["Incoming documents", "Storage and retention policy", "Document type and language scope"],
+        "inputs": [
+          "Incoming documents",
+          "Storage and retention policy",
+          "Document type and language scope"
+        ],
         "work": "Captured each document with its source, sender and receipt time, computed its checksum, and wrote the original unmodified into the agreed encrypted region under the stated retention.",
-        "tools": ["s3-compatible-encrypted-storage", "unboundpdf-docling"],
-        "outputs": ["Immutable source record"],
+        "tools": [
+          "s3-compatible-encrypted-storage",
+          "unboundpdf-docling"
+        ],
+        "outputs": [
+          "Immutable source record"
+        ],
         "decisions": [],
-        "unknowns": ["Documents whose sender cannot be resolved to a known channel, stored and flagged rather than attributed"],
+        "unknowns": [
+          "Documents whose sender cannot be resolved to a known channel, stored and flagged rather than attributed"
+        ],
         "errors": [],
-        "fingerprint": { "kind": "file-checksum", "computedFrom": "the bytes of the document exactly as it arrived", "decorative": false },
+        "fingerprint": {
+          "kind": "file-checksum",
+          "computedFrom": "the bytes of the document exactly as it arrived",
+          "decorative": false
+        },
         "fingerprintNote": "The load-bearing identity of this pack, computed and used three times: it is one half of the duplicate check, it is the key every downstream write is made under so a retry cannot create a second record, and it is what ties a written field back to a stored original."
       },
       {
         "id": "receipt-extract",
         "stepId": "step-2",
-        "inputs": ["Immutable source record"],
+        "inputs": [
+          "Immutable source record"
+        ],
         "work": "Parsed layout, text and tables, ran OCR on the pages a parse could not read as text, and recorded every value with the page and region it came from and its own confidence.",
-        "tools": ["unboundpdf-docling", "paddleocr-or-tesseract"],
-        "outputs": ["Structured extraction"],
+        "tools": [
+          "unboundpdf-docling",
+          "paddleocr-or-tesseract"
+        ],
+        "outputs": [
+          "Structured extraction"
+        ],
         "decisions": [],
-        "unknowns": ["Values present on the page but unreadable, marked as such rather than inferred from the surrounding text"],
+        "unknowns": [
+          "Values present on the page but unreadable, marked as such rather than inferred from the surrounding text"
+        ],
         "errors": [],
         "fingerprint": null,
         "fingerprintNote": "No fingerprint: each value's claim is its page and region on a stored original, which is checkable in a way a hash over the table is not."
@@ -906,12 +1159,22 @@
       {
         "id": "receipt-classify",
         "stepId": "step-3",
-        "inputs": ["Structured extraction", "Document type and language scope"],
+        "inputs": [
+          "Structured extraction",
+          "Document type and language scope"
+        ],
         "work": "Determined the document type and the process it belongs to, applied that type's required-field schema, and set aside documents matching no type in scope.",
-        "tools": ["unboundpdf-docling", "project-brain-policy"],
-        "outputs": ["Document class"],
+        "tools": [
+          "unboundpdf-docling",
+          "project-brain-policy"
+        ],
+        "outputs": [
+          "Document class"
+        ],
         "decisions": [],
-        "unknowns": ["Documents carrying features of two types, held as unknown rather than assigned to the likelier one"],
+        "unknowns": [
+          "Documents carrying features of two types, held as unknown rather than assigned to the likelier one"
+        ],
         "errors": [],
         "fingerprint": null,
         "fingerprintNote": "No fingerprint: a classification is qualified by the scope version it was made under, which is already named on the record."
@@ -919,12 +1182,28 @@
       {
         "id": "receipt-validate",
         "stepId": "step-4",
-        "inputs": ["Document class", "Required field schema", "Counterparty master data", "Purchase orders and prior documents", "Field confidence thresholds", "Write reversibility policy"],
+        "inputs": [
+          "Document class",
+          "Required field schema",
+          "Counterparty master data",
+          "Purchase orders and prior documents",
+          "Field confidence thresholds",
+          "Write reversibility policy"
+        ],
         "work": "Matched the counterparty to a master record, reconciled net, tax and gross against each other and against the purchase order, checked the tax rate valid on the document date, ran the duplicate check on document number and checksum, compared each required field to its own threshold and any payment detail to the master record, then applied the document boundary and recorded the deciding condition.",
-        "tools": ["existing-erp-crm-dms", "project-brain-policy"],
-        "outputs": ["Validation report"],
-        "decisions": ["document-boundary"],
-        "unknowns": ["Fields for which the schema names no external source, recorded as unvalidated however confidently they were read"],
+        "tools": [
+          "existing-erp-crm-dms",
+          "project-brain-policy"
+        ],
+        "outputs": [
+          "Validation report"
+        ],
+        "decisions": [
+          "document-boundary"
+        ],
+        "unknowns": [
+          "Fields for which the schema names no external source, recorded as unvalidated however confidently they were read"
+        ],
         "errors": [],
         "fingerprint": null,
         "fingerprintNote": "No fingerprint of its own: the report is qualified by the document checksum computed at intake and the schema and threshold versions it names."
@@ -932,12 +1211,22 @@
       {
         "id": "receipt-review",
         "stepId": "step-5",
-        "inputs": ["Validation report", "Immutable source record"],
+        "inputs": [
+          "Validation report",
+          "Immutable source record"
+        ],
         "work": "Recorded, from the client's reviewer, each field they corrected with the page they read it from, each value they would not confirm, and each thing they checked outside the document. No VVDex agent settles a queued field.",
-        "tools": ["approval-inbox", "s3-compatible-encrypted-storage"],
-        "outputs": ["Approval decision"],
+        "tools": [
+          "approval-inbox",
+          "s3-compatible-encrypted-storage"
+        ],
+        "outputs": [
+          "Approval decision"
+        ],
         "decisions": [],
-        "unknowns": ["Fields the reviewer left undecided, held as queued rather than defaulted to the extracted value"],
+        "unknowns": [
+          "Fields the reviewer left undecided, held as queued rather than defaulted to the extracted value"
+        ],
         "errors": [],
         "fingerprint": null,
         "fingerprintNote": "No fingerprint of its own: a decision's identity is the field and the document checksum it attaches to, both already computed."
@@ -945,48 +1234,82 @@
       {
         "id": "receipt-route",
         "stepId": "step-6",
-        "inputs": ["Approval decision", "Validation report", "Structured extraction"],
+        "inputs": [
+          "Approval decision",
+          "Validation report",
+          "Structured extraction"
+        ],
         "work": "Wrote the approved record into the destination system under the document's checksum key, read the record identifier back, and archived the derived artifacts beside the original under the stated retention.",
-        "tools": ["existing-erp-crm-dms", "s3-compatible-encrypted-storage", "evidence-ledger"],
-        "outputs": ["Action receipt"],
+        "tools": [
+          "existing-erp-crm-dms",
+          "s3-compatible-encrypted-storage",
+          "evidence-ledger"
+        ],
+        "outputs": [
+          "Action receipt"
+        ],
         "decisions": [],
-        "unknowns": ["Destination systems that return no identifier, recorded as written-but-unconfirmed rather than as written"],
+        "unknowns": [
+          "Destination systems that return no identifier, recorded as written-but-unconfirmed rather than as written"
+        ],
         "errors": [],
-        "fingerprint": { "kind": "audit-chain-entry", "computedFrom": "the previous ledger entry and this entry's content", "decorative": false },
+        "fingerprint": {
+          "kind": "audit-chain-entry",
+          "computedFrom": "the previous ledger entry and this entry's content",
+          "decorative": false
+        },
         "fingerprintNote": "A hash chain over the document record, computed and used: it is what shows the values extracted, the values approved and the values written were the same set."
       }
     ]
   },
-
   "agents": {
     "missing": [],
-    "lead": ["specialist-document-operations"],
-    "active": ["sara-intake", "evidence-qa", "vvdex-orchestrator"],
-    "conditional": ["connector-steward"],
-    "followOn": ["vvdex-strategy"],
+    "lead": [
+      "specialist-document-operations"
+    ],
+    "active": [
+      "sara-intake",
+      "evidence-qa",
+      "vvdex-orchestrator"
+    ],
+    "conditional": [
+      "connector-steward"
+    ],
+    "followOn": [
+      "vvdex-strategy"
+    ],
     "participation": [
       {
         "id": "specialist-document-operations",
         "part": "lead",
-        "stepIds": ["step-2", "step-3"],
+        "stepIds": [
+          "step-2",
+          "step-3"
+        ],
         "why": "Owns the reading of the document: parsing and OCR with every value pinned to a page and region, and the classification that decides which required-field schema the rest of the run is measured against."
       },
       {
         "id": "sara-intake",
         "part": "active",
-        "stepIds": ["step-1"],
+        "stepIds": [
+          "step-1"
+        ],
         "why": "Takes documents from the agreed channels, computes the checksum everything downstream is keyed on, and stores the original unmodified in the agreed region."
       },
       {
         "id": "evidence-qa",
         "part": "active",
-        "stepIds": ["step-4"],
+        "stepIds": [
+          "step-4"
+        ],
         "why": "Holds the document boundary: it runs every check against something outside the document, compares payment details to the master record, and separates what is uncertain from what is irreversible."
       },
       {
         "id": "vvdex-orchestrator",
         "part": "active",
-        "stepIds": ["step-6"],
+        "stepIds": [
+          "step-6"
+        ],
         "why": "Makes the write under the document's checksum key, reads the record identifier back, and archives the derived evidence beside the original."
       },
       {
@@ -1003,12 +1326,17 @@
       }
     ]
   },
-
   "tools": {
     "missing": [],
-    "required": ["unboundpdf-docling", "s3-compatible-encrypted-storage", "existing-erp-crm-dms"],
+    "required": [
+      "unboundpdf-docling",
+      "s3-compatible-encrypted-storage",
+      "existing-erp-crm-dms"
+    ],
     "optional": [],
-    "conditional": ["paddleocr-or-tesseract"],
+    "conditional": [
+      "paddleocr-or-tesseract"
+    ],
     "conditionalNote": "OCR is conditional in this pack's own row and genuinely is: a business receiving machine-generated PDFs never needs it, and a business receiving scans needs it on most pages. It runs only on pages a parse could not read as text, and only where the engagement permits page images to reach the chosen engine.",
     "available": [
       "strategy-planner",
@@ -1033,7 +1361,6 @@
     ],
     "depictedInSampleNote": "These are the tools a real run would reach at the steps the sample walks through, including OCR because the sample's document is a scan. The sample depicts their place in the workflow; it calls none of them. The evidence ledger is deliberately absent from the depiction — in the sample the document is held in review, so no write is ever recorded."
   },
-
   "publicOutput": {
     "missing": [],
     "desk": "A measurable straight-through document pipeline with field-level evidence and human review where needed.",
@@ -1073,7 +1400,6 @@
       "Any action below the configured confidence or policy threshold"
     ]
   },
-
   "simulationFixture": {
     "missing": [],
     "sampleInput": {
@@ -1094,24 +1420,114 @@
       "No record written to the business system, no payment prepared and no reply to the invoice's own address"
     ],
     "counters": [
-      { "label": "Documents received", "n": 1, "unit": "documents", "stepId": "step-1" },
-      { "label": "Documents stored", "n": 1, "unit": "documents", "stepId": "step-1" },
-      { "label": "Documents rejected at intake", "n": 0, "unit": "documents", "stepId": "step-1" },
-      { "label": "Documents parsed", "n": 1, "unit": "documents", "stepId": "step-2" },
-      { "label": "Fields extracted", "n": 58, "unit": "fields", "stepId": "step-2" },
-      { "label": "Pages needing OCR", "n": 3, "unit": "pages", "stepId": "step-2" },
-      { "label": "Documents classified", "n": 1, "unit": "documents", "stepId": "step-3" },
-      { "label": "Document types found", "n": 1, "unit": "document types", "stepId": "step-3" },
-      { "label": "Documents of unknown type", "n": 0, "unit": "documents", "stepId": "step-3" },
-      { "label": "Documents validated", "n": 1, "unit": "documents", "stepId": "step-4" },
-      { "label": "Checks passed", "n": 4, "unit": "checks", "stepId": "step-4" },
-      { "label": "Checks failed", "n": 3, "unit": "checks", "stepId": "step-4" },
-      { "label": "Documents in review", "n": 1, "unit": "documents", "stepId": "step-5" },
-      { "label": "Fields corrected", "n": 0, "unit": "fields", "stepId": "step-5" },
-      { "label": "Documents rejected", "n": 0, "unit": "documents", "stepId": "step-5" },
-      { "label": "Records written", "n": 0, "unit": "records", "stepId": "step-6" },
-      { "label": "Documents archived", "n": 0, "unit": "documents", "stepId": "step-6" },
-      { "label": "Writes that failed", "n": 0, "unit": "writes", "stepId": "step-6" }
+      {
+        "label": "Documents received",
+        "n": 1,
+        "unit": "documents",
+        "stepId": "step-1"
+      },
+      {
+        "label": "Documents stored",
+        "n": 1,
+        "unit": "documents",
+        "stepId": "step-1"
+      },
+      {
+        "label": "Documents rejected at intake",
+        "n": 0,
+        "unit": "documents",
+        "stepId": "step-1"
+      },
+      {
+        "label": "Documents parsed",
+        "n": 1,
+        "unit": "documents",
+        "stepId": "step-2"
+      },
+      {
+        "label": "Fields extracted",
+        "n": 58,
+        "unit": "fields",
+        "stepId": "step-2"
+      },
+      {
+        "label": "Pages needing OCR",
+        "n": 3,
+        "unit": "pages",
+        "stepId": "step-2"
+      },
+      {
+        "label": "Documents classified",
+        "n": 1,
+        "unit": "documents",
+        "stepId": "step-3"
+      },
+      {
+        "label": "Document types found",
+        "n": 1,
+        "unit": "document types",
+        "stepId": "step-3"
+      },
+      {
+        "label": "Documents of unknown type",
+        "n": 0,
+        "unit": "documents",
+        "stepId": "step-3"
+      },
+      {
+        "label": "Documents validated",
+        "n": 1,
+        "unit": "documents",
+        "stepId": "step-4"
+      },
+      {
+        "label": "Checks passed",
+        "n": 4,
+        "unit": "checks",
+        "stepId": "step-4"
+      },
+      {
+        "label": "Checks failed",
+        "n": 3,
+        "unit": "checks",
+        "stepId": "step-4"
+      },
+      {
+        "label": "Documents in review",
+        "n": 1,
+        "unit": "documents",
+        "stepId": "step-5"
+      },
+      {
+        "label": "Fields corrected",
+        "n": 0,
+        "unit": "fields",
+        "stepId": "step-5"
+      },
+      {
+        "label": "Documents rejected",
+        "n": 0,
+        "unit": "documents",
+        "stepId": "step-5"
+      },
+      {
+        "label": "Records written",
+        "n": 0,
+        "unit": "records",
+        "stepId": "step-6"
+      },
+      {
+        "label": "Documents archived",
+        "n": 0,
+        "unit": "documents",
+        "stepId": "step-6"
+      },
+      {
+        "label": "Writes that failed",
+        "n": 0,
+        "unit": "writes",
+        "stepId": "step-6"
+      }
     ],
     "countersNote": "Fixture data for one worked example, arithmetically closed. One document, so every document counter is 1 or 0. Its 5 pages produce 58 extracted values and 3 of the pages are images that needed OCR. The validation step runs the pack's 7 named criteria: 4 passed — counterparty matched, document number and date plausible, currency and tax rate valid on the document date, and the duplicate check on number and checksum — and 3 failed, which are the totals reconciliation, the purchase-order line match on two lines, and the required-field thresholds, the last of which is where the bank detail is routed regardless of how confidently it was read. The document is in review with 0 fields corrected and 0 documents rejected, because the reviewer has not yet answered. All three route counters are 0: nothing was written, and nothing was archived at the Route step, which is separate from the original that was stored at intake. Nothing was measured; nothing was contacted.",
     "branchResult": {
@@ -1120,7 +1536,10 @@
       "pathId": "path-review",
       "decidedBy": "Condition (3) of the document boundary, matched three times over. The gross figure does not equal net plus tax, so the arithmetic check that does not depend on any read confidence has failed. Two invoice lines have no counterpart on the purchase order. And the bank account printed on the invoice differs from the account on the supplier master record — which goes to a human regardless of confidence, because a forged payment instruction is usually rendered more cleanly than a genuine scan, and this is the one field where an accurate read of the wrong value moves money.",
       "notDecidedBy": "Conditions (1) and (2) did not fire: neither the document number nor the file checksum matches anything already processed, and the document parsed cleanly to its required fields once three pages had been through OCR. Condition (4) is not why this stopped either, although it is waiting: the destination write for this client's supplier invoices is a ledger posting with payment release, which the reversibility policy does not list as undoable, so even a document that passed every check would have been prepared and held for the named finance owner rather than written.",
-      "continues": ["path-reviewed", "path-rejected"],
+      "continues": [
+        "path-reviewed",
+        "path-rejected"
+      ],
       "endsAt": "step-5",
       "endsAtNote": "The run holds in review and nothing is archived. The reviewer gets the three failed checks with the specific pages: the totals block, the two unmatched lines, and the bank account beside the master record's account. Confirming a changed bank detail requires contacting the supplier through a channel this invoice did not supply, under the counterparty-communication gate — replying to the address on the document would confirm nothing. If the reviewer corrects values, the checks run again on the corrected record; if they will not confirm the payment detail, the document is rejected with that reason recorded against the field. Either way the supplier is not paid on this document today."
     },
@@ -1128,12 +1547,16 @@
       {
         "stepId": "step-1",
         "summary": "Received 1 document from the email inbox and stored the original unmodified in the agreed region with its checksum, sender and receipt time. Nothing was rejected at intake: the scan is poor in places but legible.",
-        "unknowns": ["The sending address is a variant of the supplier's usual one; it is recorded as observed rather than treated as either a change or an impersonation"]
+        "unknowns": [
+          "The sending address is a variant of the supplier's usual one; it is recorded as observed rather than treated as either a change or an impersonation"
+        ]
       },
       {
         "stepId": "step-2",
         "summary": "Parsed 5 pages into 58 values, 3 pages via OCR. Every value carries its page and region and the confidence of its read. The bank account was read at high confidence from a clean page — which is recorded but decides nothing, because confidence describes the reading and not the fact.",
-        "unknowns": ["Two line descriptions on an image page are partially obscured by a stamp and are marked unreadable rather than reconstructed"]
+        "unknowns": [
+          "Two line descriptions on an image page are partially obscured by a stamp and are marked unreadable rather than reconstructed"
+        ]
       },
       {
         "stepId": "step-3",
@@ -1143,12 +1566,16 @@
       {
         "stepId": "step-4",
         "summary": "Ran 7 checks: 4 passed and 3 failed. The counterparty matched a master record, the number and date are plausible for an open period, the tax rate is valid on the document date, and neither the document number nor the checksum matches anything processed before. Gross does not equal net plus tax; 2 lines have no purchase-order counterpart; and the bank account differs from the master record. Condition (3) matched and the document was queued for review.",
-        "unknowns": ["Whether the totals discrepancy is a rounding convention or a mis-read credit line cannot be settled from the page and is named for the reviewer rather than concluded"]
+        "unknowns": [
+          "Whether the totals discrepancy is a rounding convention or a mis-read credit line cannot be settled from the page and is named for the reviewer rather than concluded"
+        ]
       },
       {
         "stepId": "step-5",
         "summary": "1 document in review, holding all three failed checks with the pages a reviewer needs. 0 fields corrected and 0 documents rejected so far. The payment-detail question is marked as requiring confirmation with the supplier through a channel other than this invoice.",
-        "unknowns": ["Whether the supplier genuinely changed banks is not knowable from any document and is deliberately not estimated here"]
+        "unknowns": [
+          "Whether the supplier genuinely changed banks is not knowable from any document and is deliberately not estimated here"
+        ]
       },
       {
         "stepId": "step-6",
@@ -1160,7 +1587,6 @@
     "fingerprint": null,
     "fingerprintNote": "The sample shows no fingerprint. In a real run the file checksum is computed at intake from the document's own bytes and is used three times — the duplicate check, the write key and the tie from a written field back to a stored original — but here there is no document and no bytes, and a hash printed over fixture data would be decoration presented as evidence."
   },
-
   "readinessState": {
     "missing": [],
     "stage": "simulation",

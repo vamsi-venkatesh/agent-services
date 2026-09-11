@@ -12,7 +12,7 @@ Create `packs/<pack-id>/` and put two files in it.
 
 Two rules are worth stating before you start, because they are what the sixteen blocks exist for:
 
-1. **A block that states nothing says so.** Every block carries a `missing` array naming the field paths it does not yet state. An empty array means the block is complete. Nothing substitutes a default for an absent field, so leaving a field out and leaving it out of `missing` are different acts, and the second one is a defect.
+1. **A block that states nothing says so.** Every block carries a `missing` array naming the field paths it leaves unstated. An empty array means the block is complete. Nothing substitutes a default for an absent field, so leaving a field out and leaving it out of `missing` are different acts, and the second one is a defect.
 2. **A pack names its own nouns.** Steps carry `doingVerb` and `countNouns`; decision gates carry their own `question` and `outcomes`; the simulation fixture carries the `stepId` each counter was counted at. A pack that does not say what it counts has nothing counted for it.
 
 `graph.json` is the compiled graph, validated against `schema/graph.v1.schema.json` and then against the structural rules in `tools/validate-pack.mjs`:

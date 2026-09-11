@@ -1,6 +1,6 @@
 # Agent services as compiled graphs
 
-[![CI](https://github.com/vamsi-venkatesh/agent-services-public/actions/workflows/ci.yml/badge.svg)](https://github.com/vamsi-venkatesh/agent-services-public/actions/workflows/ci.yml)
+[![CI](https://github.com/vamsi-venkatesh/agent-services/actions/workflows/ci.yml/badge.svg)](https://github.com/vamsi-venkatesh/agent-services/actions/workflows/ci.yml)
 
 Three production-shaped agent service packs from the VVDex Agent Service Lab, with the schema, a validator, a deterministic replay runner and a sealed evidence bundle you can hash yourself.
 
@@ -29,8 +29,8 @@ The three not-applicable cases are the same in each pack, and they are the ones 
 Install nothing. Node 20 or newer, no dependencies.
 
 ```
-git clone https://github.com/vamsi-venkatesh/agent-services-public.git
-cd agent-services-public
+git clone https://github.com/vamsi-venkatesh/agent-services.git
+cd agent-services
 
 # Recompute the sealed hash of the evidence bundle
 node tools/verify-bundle.mjs packs/document-operations/evidence/run-37c494ba.evidence.json
@@ -74,7 +74,7 @@ node tools/run-mock.mjs packs/mcp-integration --route exception
 
 ## Author your own
 
-`schema/service-pack-definition.v1.schema.json` describes the sixteen blocks: identity, inputs, clarifications, workflow steps, decision gates, human gates, branching, actions, artifacts, metrics, receipts, agents, tools, public output, simulation fixture and readiness state. Every block carries a `missing` array. An empty array means the block is complete; a non-empty array names the field paths the block does not yet state. There is no default and no fallback, so a surface can only draw what a pack actually said.
+`schema/service-pack-definition.v1.schema.json` describes the sixteen blocks: identity, inputs, clarifications, workflow steps, decision gates, human gates, branching, actions, artifacts, metrics, receipts, agents, tools, public output, simulation fixture and readiness state. Every block carries a `missing` array. An empty array means the block is complete; a non-empty array names the field paths the block leaves unstated. There is no default and no fallback, so a surface can only draw what a pack actually said.
 
 Put your definition at `packs/<your-pack>/pack.json` and your compiled graph at `packs/<your-pack>/graph.json`, then:
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/vamsi-venkatesh/agent-services-public/main/schema/graph.v1.schema.json",
+  "$id": "https://raw.githubusercontent.com/vamsi-venkatesh/agent-services/main/schema/graph.v1.schema.json",
   "title": "VVDex compiled service graph, version 1",
   "description": "The compiled execution graph of one service pack. Nodes are typed, edges carry a branch type, and exactly one node is a human gate. Structural rules that a schema cannot express (one gate, authorized side effects only past the gate, every terminal reachable) are checked by tools/validate-pack.mjs.",
   "type": "object",
