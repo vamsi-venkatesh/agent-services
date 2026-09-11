@@ -4,6 +4,8 @@
 
 Three production-shaped agent service packs from the VVDex Agent Service Lab, with the schema, a validator, a deterministic replay runner and a sealed evidence bundle you can hash yourself.
 
+![The Document Operations graph in the lab hero, with the human gate marked](docs/images/hero.jpg)
+
 ## What this is
 
 A service here is a compiled graph, not a prompt and not a chain. Nodes are typed: intake, deterministic work, model reasoning, parallel workers, an aggregator, an independent verifier, a policy decision, prepared writes, the human gate, result verification and terminals. Edges carry a branch type. Each of the three graphs has exactly one human gate, and every node whose side effect is `authorized` sits behind it. Until a named person decides, a write is prepared and nothing leaves the run.
@@ -13,6 +15,8 @@ Each pack is measured by the same 58-case harness across six areas: matcher, bri
 A run leaves receipts. The receipts are hashed into a bundle, and the bundle states the hash. `packs/document-operations/evidence/run-37c494ba.evidence.json` is one such bundle, 43 receipts from a real mock-lane run, and `tools/verify-bundle.mjs` recomputes its sha256 from the receipts alone.
 
 The packs are complete operating documents. Thirteen files each: the overview, the design, the blueprint, the architecture diagram, the automation steps, the external services, the evaluation rules, the client intake questions, the customization checklist, the agent manifest, the toolkit, the runtime runbook and the project template. `pack.json` is the machine-readable definition behind them, in sixteen blocks, where a block that states nothing says so rather than being filled in by a renderer.
+
+![A supplier invoice held at the human gate: the run waits for a named person, the receipt ledger on the right](docs/images/run-stage-held.png)
 
 ## The three packs
 
@@ -50,6 +54,8 @@ node tools/run-mock.mjs packs/mcp-integration --route exception
 
 `run-mock.mjs` uses no model, no network and no credential. Identifiers and timestamps are derived from the pack id, the route and the decision, so the same command always prints the same sealed hash. Add `--out run.json` to write the bundle, then hash it with `verify-bundle.mjs`.
 
+![The Document Operations service page: the executable workflow, what it may do, what it never does](docs/images/service-page-contract.png)
+
 ## Anatomy of a pack
 
 | File | What it holds |
@@ -84,6 +90,8 @@ node tools/validate-pack.mjs packs/your-pack
 
 The validator checks both files against their schemas and then the rules the schemas cannot express. `CONTRIBUTING.md` covers what a pull request needs.
 
+![The 58-case harness for Document Operations: six areas, not-applicable cases listed first with their reasons](docs/images/harness.png)
+
 ## How the graph rules work
 
 `schema/graph.v1.schema.json` defines twelve node types and six branch types. `tools/validate-pack.mjs` then enforces what a schema cannot:
@@ -99,6 +107,8 @@ Side effects are a three-state field. `none` writes nothing. `prepared` holds a 
 
 ## Evidence
 
+![The receipt chain of run 37c494ba with the bundle hash and the verify command](docs/images/evidence.png)
+
 The bundle schema is `vvdex.evidence-bundle/v1`. Its `sha256` is taken over the canonical receipt lines in ledger order:
 
 ```
@@ -110,6 +120,8 @@ Nothing else enters the hash: not the bundle's own header, not the seal time, no
 `packs/document-operations/evidence/run-37c494ba.evidence.json` states `df99eabfb747232ccde95c64309294f3c2df77dab0c4bf75964128dc29f99a93` over 43 receipts. `node tools/verify-bundle.mjs` recomputes it and exits non-zero on a mismatch.
 
 ## Live
+
+![The showcase of 48 agent services, grouped by the work they automate](docs/images/showcase.png)
 
 The three packs are published at the Agent Service Lab:
 
