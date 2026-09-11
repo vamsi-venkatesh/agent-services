@@ -4,7 +4,7 @@
 
 Three production-shaped agent service packs from the VVDex Agent Service Lab, with the schema, a validator, a deterministic replay runner and a sealed evidence bundle you can hash yourself.
 
-![The Document Operations graph in the lab hero, with the human gate marked](docs/images/hero.jpg)
+![The Document Operations graph in the lab hero, with the human gate marked](docs/images/hero.png)
 
 ## What this is
 
