@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/vamsi-venkatesh/agent-services/actions/workflows/ci.yml/badge.svg)](https://github.com/vamsi-venkatesh/agent-services/actions/workflows/ci.yml)
 
-Three production-shaped agent service packs from the VVDex Agent Service Lab, with the schema, a validator, a deterministic replay runner and a sealed evidence bundle you can hash yourself.
+AI and agent services from the VVDex Agent Service Lab, built as governed workflows that combine model reasoning, specialist agents, deterministic operations, verification and human-controlled external actions.
 
 ## The lab
 
@@ -38,7 +38,7 @@ The three not-applicable cases are the same in each pack, and they are the ones 
 
 Install nothing. Node 20 or newer, no dependencies.
 
-```
+```bash
 git clone https://github.com/vamsi-venkatesh/agent-services.git
 cd agent-services
 
@@ -90,7 +90,7 @@ node tools/run-mock.mjs packs/mcp-integration --route exception
 
 Put your definition at `packs/<your-pack>/pack.json` and your compiled graph at `packs/<your-pack>/graph.json`, then:
 
-```
+```bash
 node tools/validate-pack.mjs packs/your-pack
 ```
 
@@ -105,6 +105,7 @@ The validator checks both files against their schemas and then the rules the sch
 - Exactly one node is a `human_gate`, and `humanGateCount` says so.
 - The gate is left by exactly one `approval` edge and one `rejection` edge.
 - No node whose side effect is `authorized` is reachable from the start when the gate is removed. A write that a person has not released cannot happen.
+- Removing the gate's approval edge must also make every `authorized` side-effect node unreachable. Passing through the gate is not itself approval.
 - Every node is reachable from the start node, every terminal is reachable, no terminal has an outgoing edge, and every other node has one.
 - In the definition, an action that is consequential and not reversible names the human gate that authorizes it.
 - Steps, receipts, counters, agent participation, paths and terminals all resolve to ids declared in the same pack.
@@ -117,7 +118,7 @@ Side effects are a three-state field. `none` writes nothing. `prepared` holds a 
 
 The bundle schema is `vvdex.evidence-bundle/v1`. Its `sha256` is taken over the canonical receipt lines in ledger order:
 
-```
+```text
 sha256( schema + "\n" + receipts.length + "\n" + for each receipt: JSON.stringify(receipt) + "\n" )
 ```
 
@@ -142,7 +143,7 @@ What has been measured, on 12, 13 and 14 September 2026:
 - Five digests delivered and read on 12 September.
 - 64 model calls on the five-city day, all under the daily cap, none in error.
 - The executable harness runs 119 cases: 117 pass and 2 fail. The two failures are kept as failures.
-- The engine carries 394 tests.
+- Buyer Radar's software regression suite is tracked in its own repository and CI rather than copied here as a changing count.
 - The order loop was proven end to end on 14 September 2026 with two test orders: site, store, workflow, register, owner alert.
 
 Two things it has not done. No open posted requirement with a contact on it has been found yet, and no order has been won through it. Both would be stated here on the day they happen.
