@@ -131,18 +131,19 @@ Nothing else enters the hash: not the bundle's own header, not the seal time, no
 
 [farmquick.in](https://farmquick.in) is a B2B fresh-produce business in Bengaluru, selling vegetables to restaurants, hotels, caterers, retailers, processors and institutions. It is the first engagement, and it was delivered end to end: the website the business sells through, and the automation that finds it buyers.
 
-**The web app.** A mobile-first ordering site on Cloudflare. It carries the catalogue, takes bulk enquiries, and writes every order into one central store. A self-hosted n8n workflow validates each order and sends the acknowledgement. Nothing is promised automatically: a person confirms every order.
+**The web app.** A mobile-first ordering site on Cloudflare. It carries the catalogue, takes bulk enquiries, and writes every order into one central store. A self-hosted n8n workflow validates each order and sends the acknowledgement. Nothing is promised automatically: a person confirms every order. An order placed on the site is stored, acknowledged to the buyer, sent to the owner, written into the Lead Desk register as a won lead, and counted in the weekly report by buyer, product and city, with a copy in the business's Google Sheet.
 
 **The automation.** Lead Desk, the lab's service, running in production. Seven open sources are read every morning across five cities - Bengaluru, Chennai, Mumbai, Delhi and Hyderabad. Every lead is scored by written rules, and a model is asked only where the rules cannot answer, under a daily cap, through a cache, with a receipt for each call. Market prices for the 42 catalogue items come from the public mandi price API. The morning digest is delivered over the company's own WhatsApp business number and its mailbox; the owner's one-word replies come back and update the register. Every run is hash-sealed.
 
-What has been measured, on 12 and 13 September 2026:
+What has been measured, on 12, 13 and 14 September 2026:
 
 - 1,175 leads registered from seven sources in the first two days.
 - 119 of those buyers carry a working phone number.
 - Five digests delivered and read on 12 September.
 - 64 model calls on the five-city day, all under the daily cap, none in error.
 - The executable harness runs 119 cases: 117 pass and 2 fail. The two failures are kept as failures.
-- The engine carries 347 tests.
+- The engine carries 394 tests.
+- The order loop was proven end to end on 14 September 2026 with two test orders: site, store, workflow, register, owner alert.
 
 Two things it has not done. No open posted requirement with a contact on it has been found yet, and no order has been won through it. Both would be stated here on the day they happen.
 
