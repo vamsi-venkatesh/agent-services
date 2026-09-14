@@ -47,9 +47,9 @@ export function graphRules(graph) {
     if (count !== 1) errors.push(`gate ${gate.id}: expected one ${branch} edge, found ${count}`);
   }
 
-  const reach = (skip) => {
+  const reach = (skip, edges = graph.edges) => {
     const out = new Map();
-    for (const edge of graph.edges) out.set(edge.source, [...(out.get(edge.source) ?? []), edge.target]);
+    for (const edge of edges) out.set(edge.source, [...(out.get(edge.source) ?? []), edge.target]);
     const seen = new Set();
     const stack = [graph.startNodeId];
     while (stack.length) {
@@ -66,6 +66,20 @@ export function graphRules(graph) {
   for (const node of graph.nodes) {
     if (node.sideEffect === 'authorized' && withoutGate.has(node.id)) {
       errors.push(`node ${node.id}: an authorized side effect is reachable without passing ${gate.id}`);
+    }
+  }
+
+  // Passing through the gate is not enough: without the approval edge, every
+  // authorized side effect must become unreachable. This catches rejection or
+  // other gate exits that accidentally rejoin an approved write path.
+  const approvalEdges = fromGate.filter((edge) => edge.branchType === 'approval');
+  if (approvalEdges.length === 1) {
+    const withoutApproval = graph.edges.filter((edge) => edge.id !== approvalEdges[0].id);
+    const reachableWithoutApproval = reach(null, withoutApproval);
+    for (const node of graph.nodes) {
+      if (node.sideEffect === 'authorized' && reachableWithoutApproval.has(node.id)) {
+        errors.push(`node ${node.id}: an authorized side effect is reachable without taking the approval edge from ${gate.id}`);
+      }
     }
   }
 
