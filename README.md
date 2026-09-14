@@ -4,6 +4,12 @@
 
 Three production-shaped agent service packs from the VVDex Agent Service Lab, with the schema, a validator, a deterministic replay runner and a sealed evidence bundle you can hash yourself.
 
+## The lab
+
+The product is the VVDex Agent Service Lab at [lab.vvdexops.com/agent-services](https://lab.vvdexops.com/agent-services/), where 49 agent services are published. Each service is an executable graph rather than a description of one: typed nodes, branch-typed edges, and exactly one human gate, which only an exception reaches. A run moves through its stages in the open and ends in a sealed receipt that can be rehashed from the receipts alone. Across the catalogue, 2,842 evaluation cases are compiled from the service definitions and 0 of them fail.
+
+This repository holds three of those services in full, so the shape can be read, validated and replayed without an account.
+
 ![The Document Operations graph in the lab hero, with the human gate marked](docs/images/hero.png)
 
 ## What this is
@@ -119,11 +125,35 @@ Nothing else enters the hash: not the bundle's own header, not the seal time, no
 
 `packs/document-operations/evidence/run-37c494ba.evidence.json` states `df99eabfb747232ccde95c64309294f3c2df77dab0c4bf75964128dc29f99a93` over 43 receipts. `node tools/verify-bundle.mjs` recomputes it and exits non-zero on a mismatch.
 
+## Client projects
+
+### FarmQuick
+
+[farmquick.in](https://farmquick.in) is a B2B fresh-produce business in Bengaluru, selling vegetables to restaurants, hotels, caterers, retailers, processors and institutions. It is the first engagement, and it was delivered end to end: the website the business sells through, and the automation that finds it buyers.
+
+**The web app.** A mobile-first ordering site on Cloudflare. It carries the catalogue, takes bulk enquiries, and writes every order into one central store. A self-hosted n8n workflow validates each order and sends the acknowledgement. Nothing is promised automatically: a person confirms every order.
+
+**The automation.** Lead Desk, the lab's service, running in production. Seven open sources are read every morning across five cities - Bengaluru, Chennai, Mumbai, Delhi and Hyderabad. Every lead is scored by written rules, and a model is asked only where the rules cannot answer, under a daily rupee cap, through a cache, with a receipt for each call. Market prices for the 42 catalogue items come from the public mandi price API. The morning digest is delivered over the company's own WhatsApp business number and its mailbox; the owner's one-word replies come back and update the register. Every run is hash-sealed.
+
+What has been measured, on 12 and 13 September 2026:
+
+- 1,175 leads registered from seven sources in the first two days.
+- 119 of those buyers carry a working phone number.
+- Five digests delivered and read on 12 September.
+- Model spend of ₹12.36 for the five-city day, over 64 calls, with no errors.
+- The executable harness runs 119 cases: 117 pass and 2 fail. The two failures are kept as failures.
+- The engine carries 347 tests.
+
+Two things it has not done. No open posted requirement with a contact on it has been found yet, and no order has been won through it. Both would be stated here on the day they happen.
+
+- Service page: [Lead Desk](https://lab.vvdexops.com/agent-services/services/lead-desk.html)
+- Source: [github.com/vamsi-venkatesh/buyer-radar](https://github.com/vamsi-venkatesh/buyer-radar)
+
 ## Live
 
-![The showcase of 48 agent services, grouped by the work they automate](docs/images/showcase.png)
+![The showcase of 49 agent services, grouped by the work they automate](docs/images/showcase.png)
 
-The three packs are published at the Agent Service Lab:
+The three packs are three of the 49 services published at the Agent Service Lab:
 
 - [lab.vvdexops.com/agent-services](https://lab.vvdexops.com/agent-services/)
 - [Document Operations](https://lab.vvdexops.com/agent-services/document-operations/)
