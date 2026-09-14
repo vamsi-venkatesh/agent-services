@@ -51,6 +51,19 @@ test('an authorized write reachable without the gate is rejected', () => {
   );
 });
 
+test('a rejection path cannot reach an authorized write', () => {
+  const graph = graphOf('mcp-integration');
+  const gate = graph.nodes.find((node) => node.type === 'human_gate');
+  const authorized = graph.nodes.find((node) => node.sideEffect === 'authorized');
+  const rejection = graph.edges.find((edge) => edge.source === gate.id && edge.branchType === 'rejection');
+  rejection.target = authorized.id;
+  const errors = graphRules(graph);
+  assert.ok(
+    errors.some((error) => error.includes('without taking the approval edge')),
+    errors.join('; '),
+  );
+});
+
 test('an unreachable node is rejected', () => {
   const graph = graphOf('n8n-automation-rescue');
   const orphaned = graph.nodes.find((node) => node.type === 'independent_verifier');
