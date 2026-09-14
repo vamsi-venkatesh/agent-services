@@ -133,14 +133,14 @@ Nothing else enters the hash: not the bundle's own header, not the seal time, no
 
 **The web app.** A mobile-first ordering site on Cloudflare. It carries the catalogue, takes bulk enquiries, and writes every order into one central store. A self-hosted n8n workflow validates each order and sends the acknowledgement. Nothing is promised automatically: a person confirms every order.
 
-**The automation.** Lead Desk, the lab's service, running in production. Seven open sources are read every morning across five cities - Bengaluru, Chennai, Mumbai, Delhi and Hyderabad. Every lead is scored by written rules, and a model is asked only where the rules cannot answer, under a daily rupee cap, through a cache, with a receipt for each call. Market prices for the 42 catalogue items come from the public mandi price API. The morning digest is delivered over the company's own WhatsApp business number and its mailbox; the owner's one-word replies come back and update the register. Every run is hash-sealed.
+**The automation.** Lead Desk, the lab's service, running in production. Seven open sources are read every morning across five cities - Bengaluru, Chennai, Mumbai, Delhi and Hyderabad. Every lead is scored by written rules, and a model is asked only where the rules cannot answer, under a daily cap, through a cache, with a receipt for each call. Market prices for the 42 catalogue items come from the public mandi price API. The morning digest is delivered over the company's own WhatsApp business number and its mailbox; the owner's one-word replies come back and update the register. Every run is hash-sealed.
 
 What has been measured, on 12 and 13 September 2026:
 
 - 1,175 leads registered from seven sources in the first two days.
 - 119 of those buyers carry a working phone number.
 - Five digests delivered and read on 12 September.
-- Model spend of ₹12.36 for the five-city day, over 64 calls, with no errors.
+- 64 model calls on the five-city day, all under the daily cap, none in error.
 - The executable harness runs 119 cases: 117 pass and 2 fail. The two failures are kept as failures.
 - The engine carries 347 tests.
 
